@@ -1,0 +1,39 @@
+# Ignore capture files
+captures/
+*.cap
+*.pcap
+*.pcapng
+
+# Ignore recon output
+recon/
+*.nmap
+*.gnmap
+*.xml
+
+# Ignore wordlists (too large)
+wordlists/
+*.txt.gz
+
+# Ignore LCD driver repo
+LCD-show-kali/
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+*.tmp
+*.swp
+*~
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore credentials (if any)
+credentials/
+*.creds
