@@ -329,6 +329,9 @@ python_menu() {
         echo -e "  ${CYAN}[3]${NC} WiFi Monitor"
         echo -e "      Track devices nearby"
         echo ""
+        echo -e "  ${CYAN}[4]${NC} WiFi Speed Limiter"
+        echo -e "      Throttle bandwidth of devices"
+        echo ""
         echo -e "  ${CYAN}[0]${NC} Back"
         echo ""
         read -p "$(echo -e ${GREEN}Select option: ${NC})" choice
@@ -352,6 +355,9 @@ python_menu() {
                 echo -e "${YELLOW}Press Ctrl+C to stop${NC}"
                 sudo python3 "$SCRIPT_DIR/wifi_monitor.py" "$iface"
                 ;;
+            4)
+                 sudo "$SCRIPT_DIR/wifi_throttle.sh"
+                 ;;
             0) break ;;
             *) echo -e "${RED}Invalid option${NC}" ;;
         esac

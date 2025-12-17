@@ -102,6 +102,7 @@ test_file_structure() {
         "smart_scan.py"
         "packet_visualizer.py"
         "wifi_monitor.py"
+        "wifi_throttle.sh"
         "README.md"
         "QUICKSTART.md"
         "DEPLOYMENT.md"
