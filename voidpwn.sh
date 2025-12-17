@@ -63,13 +63,14 @@ show_menu() {
     echo -e "${YELLOW}╚════════════════════════════════════╝${NC}"
     echo ""
     echo -e "  ${CYAN}[1]${NC} Auto Scenarios"
-    echo -e "  ${CYAN}[2]${NC} WiFi Tools"
-    echo -e "  ${CYAN}[3]${NC} Network Reconnaissance"
-    echo -e "  ${CYAN}[4]${NC} Password Attacks"
-    echo -e "  ${CYAN}[5]${NC} Exploitation Tools"
-    echo -e "  ${CYAN}[6]${NC} System Tools"
-    echo -e "  ${CYAN}[7]${NC} View Captures"
-    echo -e "  ${CYAN}[8]${NC} Web Dashboard"
+    echo -e "  ${CYAN}[2]${NC} Python Tools"
+    echo -e "  ${CYAN}[3]${NC} WiFi Tools"
+    echo -e "  ${CYAN}[4]${NC} Network Reconnaissance"
+    echo -e "  ${CYAN}[5]${NC} Password Attacks"
+    echo -e "  ${CYAN}[6]${NC} Exploitation Tools"
+    echo -e "  ${CYAN}[7]${NC} System Tools"
+    echo -e "  ${CYAN}[8]${NC} View Captures"
+    echo -e "  ${CYAN}[9]${NC} Web Dashboard"
     echo -e "  ${CYAN}[0]${NC} Exit"
     echo ""
 }
@@ -311,6 +312,55 @@ system_menu() {
     done
 }
 
+# Python Tools menu
+python_menu() {
+    while true; do
+        print_banner
+        echo -e "${YELLOW}╔════════════════════════════════════╗${NC}"
+        echo -e "${YELLOW}║        PYTHON TOOLS                ║${NC}"
+        echo -e "${YELLOW}╚════════════════════════════════════╝${NC}"
+        echo ""
+        echo -e "  ${CYAN}[1]${NC} Smart Scan"
+        echo -e "      Intelligent automated enumeration"
+        echo ""
+        echo -e "  ${CYAN}[2]${NC} Packet Visualizer"
+        echo -e "      Matrix-style traffic display"
+        echo ""
+        echo -e "  ${CYAN}[3]${NC} WiFi Monitor"
+        echo -e "      Track devices nearby"
+        echo ""
+        echo -e "  ${CYAN}[0]${NC} Back"
+        echo ""
+        read -p "$(echo -e ${GREEN}Select option: ${NC})" choice
+        
+        case $choice in
+            1) 
+                read -p "Enter target IP: " target
+                sudo python3 "$SCRIPT_DIR/smart_scan.py" "$target"
+                ;;
+            2) 
+                echo -e "${YELLOW}Press Ctrl+C to stop${NC}"
+                sudo python3 "$SCRIPT_DIR/packet_visualizer.py"
+                ;;
+            3)
+                ifconfig | grep -q "monitor"
+                if [ $? -ne 0 ]; then
+                    read -p "Monitor interface (e.g., wlan1mon): " iface
+                else
+                    iface=$(iw dev | grep Interface | grep mon | awk '{print $2}' | head -1)
+                fi
+                echo -e "${YELLOW}Press Ctrl+C to stop${NC}"
+                sudo python3 "$SCRIPT_DIR/wifi_monitor.py" "$iface"
+                ;;
+            0) break ;;
+            *) echo -e "${RED}Invalid option${NC}" ;;
+        esac
+        
+        echo ""
+        read -p "Press Enter to continue..."
+    done
+}
+
 # Dashboard menu
 dashboard_menu() {
     while true; do
@@ -384,13 +434,14 @@ main() {
         
         case $choice in
             1) sudo "$SCRIPT_DIR/scenarios.sh" ;;
-            2) wifi_menu ;;
-            3) recon_menu ;;
-            4) password_menu ;;
-            5) exploit_menu ;;
-            6) system_menu ;;
-            7) view_captures ;;
-            8) dashboard_menu ;;
+            2) python_menu ;;
+            3) wifi_menu ;;
+            4) recon_menu ;;
+            5) password_menu ;;
+            6) exploit_menu ;;
+            7) system_menu ;;
+            8) view_captures ;;
+            9) dashboard_menu ;;
             0) 
                 echo -e "${CYAN}Exiting VoidPWN...${NC}"
                 exit 0

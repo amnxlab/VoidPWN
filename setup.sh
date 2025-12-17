@@ -83,10 +83,10 @@ install_essential_tools() {
     
     log_success "Essential tools installed"
     
-    # Install Python packages for dashboard
-    log_info "Installing Python packages for dashboard..."
+    # Install Python packages for dashboard and custom tools
+    log_info "Installing Python packages..."
     # Use apt instead of pip to avoid "externally managed environment" error
-    apt install -y python3-flask python3-psutil
+    apt install -y python3-flask python3-psutil python3-scapy
     log_success "Python packages installed"
 }
 
