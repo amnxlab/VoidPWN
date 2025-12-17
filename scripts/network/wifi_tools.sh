@@ -18,7 +18,7 @@ NC='\033[0m'
 # Configuration
 INTERFACE="wlan1"
 MONITOR_INTERFACE="${INTERFACE}mon"
-OUTPUT_DIR="$HOME/VoidPWN/captures"
+OUTPUT_DIR="$HOME/VoidPWN/output/captures"
 WORDLIST="/usr/share/wordlists/rockyou.txt"
 
 # Create output directory

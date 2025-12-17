@@ -18,13 +18,13 @@ cd VoidPWN
 ### 2. Make Scripts Executable
 
 ```bash
-chmod +x *.sh
+chmod +x *.sh */*/*.sh
 ```
 
 ### 3. Run Main Setup
 
 ```bash
-sudo ./setup.sh
+sudo ./scripts/core/setup.sh
 ```
 
 This will:
@@ -64,16 +64,16 @@ cd ~/VoidPWN
 
 ```bash
 # WiFi attacks
-sudo ./wifi_tools.sh --scan
-sudo ./wifi_tools.sh --auto-attack
+sudo ./scripts/network/wifi_tools.sh --scan
+sudo ./scripts/network/wifi_tools.sh --auto-attack
 
 # Network recon
-sudo ./recon.sh --quick 192.168.1.0/24
-sudo ./recon.sh --full 192.168.1.100
+sudo ./scripts/network/recon.sh --quick 192.168.1.0/24
+sudo ./scripts/network/recon.sh --full 192.168.1.100
 
 # View help
-./wifi_tools.sh --help
-./recon.sh --help
+./scripts/network/wifi_tools.sh --help
+./scripts/network/recon.sh --help
 ```
 
 ---
@@ -128,35 +128,35 @@ Open browser to: `http://<PI_IP>:8421`
 
 ```bash
 # 1. Scan for networks
-sudo ./wifi_tools.sh --scan
+sudo ./scripts/network/wifi_tools.sh --scan
 
 # 2. Capture handshake (note BSSID and channel from scan)
-sudo ./wifi_tools.sh --handshake AA:BB:CC:DD:EE:FF 6
+sudo ./scripts/network/wifi_tools.sh --handshake AA:BB:CC:DD:EE:FF 6
 
 # 3. Crack the handshake
-sudo ./wifi_tools.sh --crack ~/VoidPWN/captures/handshake-01.cap
+sudo ./scripts/network/wifi_tools.sh --crack ~/VoidPWN/output/captures/handshake-01.cap
 ```
 
 ### Network Reconnaissance
 
 ```bash
 # Discover local network
-sudo ./recon.sh --discover
+sudo ./scripts/network/recon.sh --discover
 
 # Quick scan
-sudo ./recon.sh --quick 192.168.1.0/24
+sudo ./scripts/network/recon.sh --quick 192.168.1.0/24
 
 # Full scan of specific host
-sudo ./recon.sh --full 192.168.1.100
+sudo ./scripts/network/recon.sh --full 192.168.1.100
 
 # Comprehensive scan
-sudo ./recon.sh --comprehensive 192.168.1.100
+sudo ./scripts/network/recon.sh --comprehensive 192.168.1.100
 ```
 
 ### Automated WiFi Attack
 
 ```bash
-sudo ./wifi_tools.sh --auto-attack
+sudo ./scripts/network/wifi_tools.sh --auto-attack
 # Uses Wifite to automatically attack nearby networks
 ```
 
@@ -164,8 +164,8 @@ sudo ./wifi_tools.sh --auto-attack
 
 ## Output Locations
 
-- **WiFi Captures**: `~/VoidPWN/captures/`
-- **Recon Results**: `~/VoidPWN/recon/`
+- **WiFi Captures**: `~/VoidPWN/output/captures/`
+- **Recon Results**: `~/VoidPWN/output/recon/`
 
 ---
 
@@ -174,7 +174,7 @@ sudo ./wifi_tools.sh --auto-attack
 Only run after all other setup is complete:
 
 ```bash
-sudo ./install_lcd.sh
+sudo ./scripts/core/install_lcd.sh
 ```
 
 To revert to HDMI:
@@ -248,7 +248,7 @@ sudo systemctl enable ssh
 ### Additional Tools
 
 ```bash
-sudo ./install_tools.sh
+sudo ./scripts/core/install_tools.sh
 ```
 
 Choose from:

@@ -95,24 +95,24 @@ wifi_menu() {
         read -p "$(echo -e ${GREEN}Select option: ${NC})" choice
         
         case $choice in
-            1) sudo "$SCRIPT_DIR/wifi_tools.sh" --scan ;;
+            1) sudo "$SCRIPT_DIR/scripts/network/wifi_tools.sh" --scan ;;
             2) 
                 read -p "BSSID: " bssid
                 read -p "Channel: " channel
-                sudo "$SCRIPT_DIR/wifi_tools.sh" --handshake "$bssid" "$channel"
+                sudo "$SCRIPT_DIR/scripts/network/wifi_tools.sh" --handshake "$bssid" "$channel"
                 ;;
-            3) sudo "$SCRIPT_DIR/wifi_tools.sh" --auto-attack ;;
+            3) sudo "$SCRIPT_DIR/scripts/network/wifi_tools.sh" --auto-attack ;;
             4)
                 read -p "BSSID: " bssid
                 read -p "Count (0=continuous): " count
-                sudo "$SCRIPT_DIR/wifi_tools.sh" --deauth "$bssid" "$count"
+                sudo "$SCRIPT_DIR/scripts/network/wifi_tools.sh" --deauth "$bssid" "$count"
                 ;;
             5)
                 read -p "Capture file path: " capfile
-                sudo "$SCRIPT_DIR/wifi_tools.sh" --crack "$capfile"
+                sudo "$SCRIPT_DIR/scripts/network/wifi_tools.sh" --crack "$capfile"
                 ;;
-            6) sudo "$SCRIPT_DIR/wifi_tools.sh" --monitor-on ;;
-            7) sudo "$SCRIPT_DIR/wifi_tools.sh" --monitor-off ;;
+            6) sudo "$SCRIPT_DIR/scripts/network/wifi_tools.sh" --monitor-on ;;
+            7) sudo "$SCRIPT_DIR/scripts/network/wifi_tools.sh" --monitor-off ;;
             0) break ;;
             *) echo -e "${RED}Invalid option${NC}" ;;
         esac
@@ -146,36 +146,36 @@ recon_menu() {
         case $choice in
             1)
                 read -p "Target (IP/CIDR): " target
-                sudo "$SCRIPT_DIR/recon.sh" --quick "$target"
+                sudo "$SCRIPT_DIR/scripts/network/recon.sh" --quick "$target"
                 ;;
             2)
                 read -p "Target IP: " target
-                sudo "$SCRIPT_DIR/recon.sh" --full "$target"
+                sudo "$SCRIPT_DIR/scripts/network/recon.sh" --full "$target"
                 ;;
             3)
                 read -p "Target IP: " target
-                sudo "$SCRIPT_DIR/recon.sh" --stealth "$target"
+                sudo "$SCRIPT_DIR/scripts/network/recon.sh" --stealth "$target"
                 ;;
             4)
                 read -p "Target IP: " target
-                sudo "$SCRIPT_DIR/recon.sh" --vuln "$target"
+                sudo "$SCRIPT_DIR/scripts/network/recon.sh" --vuln "$target"
                 ;;
             5)
                 read -p "Target URL: " target
-                sudo "$SCRIPT_DIR/recon.sh" --web "$target"
+                sudo "$SCRIPT_DIR/scripts/network/recon.sh" --web "$target"
                 ;;
             6)
                 read -p "Target IP: " target
-                sudo "$SCRIPT_DIR/recon.sh" --smb "$target"
+                sudo "$SCRIPT_DIR/scripts/network/recon.sh" --smb "$target"
                 ;;
             7)
                 read -p "Domain: " domain
-                sudo "$SCRIPT_DIR/recon.sh" --dns "$domain"
+                sudo "$SCRIPT_DIR/scripts/network/recon.sh" --dns "$domain"
                 ;;
-            8) sudo "$SCRIPT_DIR/recon.sh" --discover ;;
+            8) sudo "$SCRIPT_DIR/scripts/network/recon.sh" --discover ;;
             9)
                 read -p "Target IP: " target
-                sudo "$SCRIPT_DIR/recon.sh" --comprehensive "$target"
+                sudo "$SCRIPT_DIR/scripts/network/recon.sh" --comprehensive "$target"
                 ;;
             0) break ;;
             *) echo -e "${RED}Invalid option${NC}" ;;
@@ -339,11 +339,11 @@ python_menu() {
         case $choice in
             1) 
                 read -p "Enter target IP: " target
-                sudo python3 "$SCRIPT_DIR/smart_scan.py" "$target"
+                sudo python3 "$SCRIPT_DIR/scripts/python/smart_scan.py" "$target"
                 ;;
             2) 
                 echo -e "${YELLOW}Press Ctrl+C to stop${NC}"
-                sudo python3 "$SCRIPT_DIR/packet_visualizer.py"
+                sudo python3 "$SCRIPT_DIR/scripts/python/packet_visualizer.py"
                 ;;
             3)
                 ifconfig | grep -q "monitor"
@@ -353,10 +353,10 @@ python_menu() {
                     iface=$(iw dev | grep Interface | grep mon | awk '{print $2}' | head -1)
                 fi
                 echo -e "${YELLOW}Press Ctrl+C to stop${NC}"
-                sudo python3 "$SCRIPT_DIR/wifi_monitor.py" "$iface"
+                sudo python3 "$SCRIPT_DIR/scripts/python/wifi_monitor.py" "$iface"
                 ;;
             4)
-                 sudo "$SCRIPT_DIR/wifi_throttle.sh"
+                 sudo "$SCRIPT_DIR/scripts/network/wifi_throttle.sh"
                  ;;
             0) break ;;
             *) echo -e "${RED}Invalid option${NC}" ;;
@@ -385,13 +385,13 @@ dashboard_menu() {
         
         case $choice in
             1) 
-                "$SCRIPT_DIR/dashboard.sh" start
+                "$SCRIPT_DIR/scripts/core/dashboard.sh" start
                 ;;
             2) 
-                "$SCRIPT_DIR/dashboard.sh" stop
+                "$SCRIPT_DIR/scripts/core/dashboard.sh" stop
                 ;;
             3) 
-                "$SCRIPT_DIR/dashboard.sh" status
+                "$SCRIPT_DIR/scripts/core/dashboard.sh" status
                 ;;
             4)
                 IP=$(hostname -I | awk '{print $1}')
@@ -439,7 +439,7 @@ main() {
         read -p "$(echo -e ${GREEN}Select option: ${NC})" choice
         
         case $choice in
-            1) sudo "$SCRIPT_DIR/scenarios.sh" ;;
+            1) sudo "$SCRIPT_DIR/scripts/network/scenarios.sh" ;;
             2) python_menu ;;
             3) wifi_menu ;;
             4) recon_menu ;;

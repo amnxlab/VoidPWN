@@ -16,7 +16,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 # Configuration
-OUTPUT_DIR="$HOME/VoidPWN/recon"
+OUTPUT_DIR="$HOME/VoidPWN/output/recon"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Create output directory

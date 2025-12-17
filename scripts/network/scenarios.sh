@@ -17,9 +17,9 @@ NC='\033[0m'
 
 # Directories
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-OUTPUT_DIR="$HOME/VoidPWN/scenarios"
-CAPTURES_DIR="$HOME/VoidPWN/captures"
-RECON_DIR="$HOME/VoidPWN/recon"
+OUTPUT_DIR="$HOME/VoidPWN/output/scenarios"
+CAPTURES_DIR="$HOME/VoidPWN/output/captures"
+RECON_DIR="$HOME/VoidPWN/output/recon"
 
 # Create output directory
 mkdir -p "$OUTPUT_DIR"

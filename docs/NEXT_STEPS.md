@@ -8,17 +8,14 @@ Your VoidPWN project is complete and ready to deploy.
 
 ```
 VoidPWN/
-├── setup.sh              Main installer (installs everything)
-├── wifi_tools.sh         WiFi attacks (scan, capture, crack)
-├── recon.sh              Network scanning (nmap, vuln scans)
+├── scripts/
+│   ├── core/             Setup, test, tools, dashboard
+│   ├── network/          WiFi tools, recon, scenarios
+│   └── python/           Python logic (scanning, visualization)
 ├── voidpwn.sh            Interactive menu (main interface)
-├── install_lcd.sh        LCD setup (run LAST)
-├── install_tools.sh      Extra tools (optional)
 ├── README.md             Full documentation
-├── QUICKSTART.md         Quick reference
-├── DEPLOYMENT.md         Installation guide
 ├── LICENSE               MIT License
-└── .gitignore            Git configuration
+└── docs/                 Documentation (Quickstart, Deployment, etc)
 ```
 
 ---
@@ -57,7 +54,7 @@ scp -r C:\Users\ahmedamin\Github\VoidPWN kali@<PI_IP>:~/
 chmod +x *.sh
 
 # Run main setup
-sudo ./setup.sh
+sudo ./scripts/core/setup.sh
 
 # Wait for installation to complete
 # This installs 50+ tools automatically
@@ -80,8 +77,8 @@ sudo reboot
 voidpwn
 
 # Or use scripts directly:
-sudo ./wifi_tools.sh --scan
-sudo ./recon.sh --discover
+sudo ./scripts/network/wifi_tools.sh --scan
+sudo ./scripts/network/recon.sh --discover
 ```
 
 ---
@@ -90,12 +87,12 @@ sudo ./recon.sh --discover
 
 - [ ] Transfer VoidPWN to Raspberry Pi
 - [ ] Run `chmod +x *.sh`
-- [ ] Run `sudo ./setup.sh`
+- [ ] Run `sudo ./scripts/core/setup.sh`
 - [ ] Wait for installation (30-60 min)
 - [ ] Reboot Pi
 - [ ] Plug in ALFA WiFi adapter
 - [ ] Test with `voidpwn` command
-- [ ] LAST: Install LCD with `sudo ./install_lcd.sh`
+- [ ] LAST: Install LCD with `sudo ./scripts/core/install_lcd.sh`
 
 ---
 
@@ -104,11 +101,11 @@ sudo ./recon.sh --discover
 | What You Want | Command |
 |---------------|---------|
 | **Launch menu** | `voidpwn` |
-| **Scan WiFi** | `sudo ./wifi_tools.sh --scan` |
-| **Capture handshake** | `sudo ./wifi_tools.sh --handshake <BSSID> <CH>` |
-| **Network scan** | `sudo ./recon.sh --quick 192.168.1.0/24` |
-| **Full port scan** | `sudo ./recon.sh --full 192.168.1.100` |
-| **Install LCD** | `sudo ./install_lcd.sh` |
+| **Scan WiFi** | `sudo ./scripts/network/wifi_tools.sh --scan` |
+| **Capture handshake** | `sudo ./scripts/network/wifi_tools.sh --handshake <BSSID> <CH>` |
+| **Network scan** | `sudo ./scripts/network/recon.sh --quick 192.168.1.0/24` |
+| **Full port scan** | `sudo ./scripts/network/recon.sh --full 192.168.1.100` |
+| **Install LCD** | `sudo ./scripts/core/install_lcd.sh` |
 | **Revert to HDMI** | `cd ~/VoidPWN/LCD-show-kali && sudo ./LCD-hdmi` |
 
 ---
@@ -143,8 +140,8 @@ sudo ./recon.sh --discover
 | File | Purpose |
 |------|---------|
 | [README.md](README.md) | Complete project overview |
-| [QUICKSTART.md](QUICKSTART.md) | Quick reference guide |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Detailed installation steps |
+| [docs/QUICKSTART.md](docs/QUICKSTART.md) | Quick reference guide |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Detailed installation steps |
 
 ---
 
@@ -165,7 +162,7 @@ Make sure to plug in your ALFA AWUS036ACS adapter (or compatible) for WiFi attac
 
 Your VoidPWN project is complete and ready to deploy.
 
-Next action: Transfer the files to your Pi and run `sudo ./setup.sh`
+Next action: Transfer the files to your Pi and run `sudo ./scripts/core/setup.sh`
 
 Happy ethical hacking.
 

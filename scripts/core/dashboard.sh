@@ -19,7 +19,9 @@ log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
 log_warning() { echo -e "${YELLOW}[!]${NC} $1"; }
 log_error() { echo -e "${RED}[✗]${NC} $1"; }
 
-DASHBOARD_DIR="$HOME/VoidPWN/dashboard"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
+DASHBOARD_DIR="$PROJECT_ROOT/dashboard"
 PID_FILE="/tmp/voidpwn_dashboard.pid"
 
 # Check if Flask is installed

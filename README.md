@@ -103,14 +103,16 @@ ip a
 cd ~
 git clone https://github.com/void0x11/VoidPWN.git
 cd VoidPWN
-chmod +x *.sh
+chmod +x voidpwn.sh
+chmod +x scripts/core/*.sh
+chmod +x scripts/network/*.sh
 ```
 
 ### Step 4: Run Setup Script
 
 ```bash
 # Install all tools and configure system
-sudo ./setup.sh
+sudo ./scripts/core/setup.sh
 
 # This will:
 # - Install pentesting tools
@@ -129,7 +131,7 @@ sudo ./setup.sh
 
 ```bash
 # Only run this when everything else is configured
-sudo ./install_lcd.sh
+sudo ./scripts/core/install_lcd.sh
 ```
 
 ---
@@ -139,17 +141,17 @@ sudo ./install_lcd.sh
 ### Quick Start
 
 ```bash
+# Launch interactive menu (Recommended)
+./voidpwn.sh
+
 # WiFi reconnaissance
-./wifi_tools.sh --scan
+./scripts/network/wifi_tools.sh --scan
 
 # Automated WiFi attack
-./wifi_tools.sh --auto-attack
+./scripts/network/wifi_tools.sh --auto-attack
 
 # Network reconnaissance
-./recon.sh --target 192.168.1.0/24
-
-# Launch interactive menu
-./voidpwn.sh
+./scripts/network/recon.sh --target 192.168.1.0/24
 ```
 
 ### Remote Access
@@ -168,11 +170,11 @@ http://<RASPBERRY_PI_IP>:8421
 
 | Script | Description | Usage |
 |--------|-------------|-------|
-| `setup.sh` | Main installation script | `sudo ./setup.sh` |
-| `wifi_tools.sh` | WiFi attack automation | `./wifi_tools.sh --help` |
-| `recon.sh` | Network reconnaissance | `./recon.sh --target <IP>` |
-| `install_tools.sh` | Install additional tools | `sudo ./install_tools.sh` |
-| `install_lcd.sh` | LCD display driver setup | `sudo ./install_lcd.sh` |
+| `scripts/core/setup.sh` | Main installation script | `sudo ./scripts/core/setup.sh` |
+| `scripts/network/wifi_tools.sh` | WiFi attack automation | `./scripts/network/wifi_tools.sh --help` |
+| `scripts/network/recon.sh` | Network reconnaissance | `./scripts/network/recon.sh --target <IP>` |
+| `scripts/core/install_tools.sh` | Install additional tools | `sudo ./scripts/core/install_tools.sh` |
+| `scripts/core/install_lcd.sh` | LCD display driver setup | `sudo ./scripts/core/install_lcd.sh` |
 | `voidpwn.sh` | Interactive main menu | `./voidpwn.sh` |
 
 ---

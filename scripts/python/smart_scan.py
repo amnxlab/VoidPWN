@@ -126,7 +126,7 @@ def main():
         log("This script requires root privileges", "ERROR")
         sys.exit(1)
         
-    output_base = os.path.expanduser("~/VoidPWN/recon")
+    output_base = os.path.expanduser("~/VoidPWN/output/recon")
     scan_target(args.target, output_base)
 
 if __name__ == "__main__":

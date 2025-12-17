@@ -303,7 +303,7 @@ main() {
     echo "  1. Reboot the system: sudo reboot"
     echo "  2. Plug in your ALFA WiFi adapter"
     echo "  3. Run: voidpwn (to launch the menu)"
-    echo "  4. Install LCD last: sudo ./install_lcd.sh"
+    echo "  4. Install LCD last: sudo ./scripts/core/install_lcd.sh"
     echo ""
     log_warning "Reboot recommended to apply all changes"
 }

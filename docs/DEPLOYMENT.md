@@ -24,10 +24,10 @@ git clone https://github.com/void0x11/VoidPWN.git
 cd VoidPWN
 
 # Make scripts executable
-chmod +x *.sh
+chmod +x *.sh */*/*.sh
 
 # Run setup
-sudo ./setup.sh
+sudo ./scripts/core/setup.sh
 ```
 
 ---
@@ -49,8 +49,8 @@ scp -r . kali@<PI_IP>:~/VoidPWN/
 ```bash
 ssh kali@<PI_IP>
 cd ~/VoidPWN
-chmod +x *.sh
-sudo ./setup.sh
+chmod +x *.sh */*/*.sh
+sudo ./scripts/core/setup.sh
 ```
 
 ---
@@ -73,10 +73,10 @@ cp -r /mnt/VoidPWN ~/
 cd ~/VoidPWN
 
 # Make executable
-chmod +x *.sh
+chmod +x *.sh */*/*.sh
 
 # Run setup
-sudo ./setup.sh
+sudo ./scripts/core/setup.sh
 ```
 
 ---
@@ -87,7 +87,7 @@ sudo ./setup.sh
 
 ```bash
 cd ~/VoidPWN
-sudo ./setup.sh
+sudo ./scripts/core/setup.sh
 ```
 
 This installs:
@@ -127,15 +127,15 @@ iwconfig
 # wlan1 - ALFA adapter
 
 # Test monitor mode
-sudo ./wifi_tools.sh --monitor-on
+sudo ./scripts/network/wifi_tools.sh --monitor-on
 iwconfig  # Should see wlan1mon
-sudo ./wifi_tools.sh --monitor-off
+sudo ./scripts/network/wifi_tools.sh --monitor-off
 ```
 
 ### 5. Optional: Install Additional Tools
 
 ```bash
-sudo ./install_tools.sh
+sudo ./scripts/core/install_tools.sh
 ```
 
 Choose from menu:
@@ -151,7 +151,7 @@ Choose from menu:
 WARNING: Only after everything else works!
 
 ```bash
-sudo ./install_lcd.sh
+sudo ./scripts/core/install_lcd.sh
 ```
 
 System will reboot and output will switch to LCD.
@@ -163,7 +163,7 @@ System will reboot and output will switch to LCD.
 ### Test 1: WiFi Scanning
 
 ```bash
-sudo ./wifi_tools.sh --scan
+sudo ./scripts/network/wifi_tools.sh --scan
 ```
 
 Should show nearby WiFi networks.
@@ -171,7 +171,7 @@ Should show nearby WiFi networks.
 ### Test 2: Network Discovery
 
 ```bash
-sudo ./recon.sh --discover
+sudo ./scripts/network/recon.sh --discover
 ```
 
 Should show devices on your network.
@@ -194,7 +194,7 @@ If your ALFA adapter is on a different interface:
 
 ```bash
 # Edit wifi_tools.sh
-nano ~/VoidPWN/wifi_tools.sh
+nano ~/VoidPWN/scripts/network/wifi_tools.sh
 
 # Change line 18:
 INTERFACE="wlan1"  # Change to your interface name
@@ -248,14 +248,14 @@ Open browser: `http://<PI_IP>:8421`
 
 ```bash
 # 1. Scan
-sudo ./wifi_tools.sh --scan
+sudo ./scripts/network/wifi_tools.sh --scan
 # Note the BSSID and Channel of YOUR network
 
 # 2. Capture handshake
-sudo ./wifi_tools.sh --handshake <BSSID> <CHANNEL>
+sudo ./scripts/network/wifi_tools.sh --handshake <BSSID> <CHANNEL>
 
 # 3. Crack (if you have the password for testing)
-sudo ./wifi_tools.sh --crack ~/VoidPWN/captures/handshake-01.cap
+sudo ./scripts/network/wifi_tools.sh --crack ~/VoidPWN/output/captures/handshake-01.cap
 ```
 
 ---
@@ -272,7 +272,7 @@ ping google.com
 sudo apt update
 
 # Try setup again
-sudo ./setup.sh
+sudo ./scripts/core/setup.sh
 ```
 
 ### WiFi Adapter Not Working
@@ -291,10 +291,10 @@ sudo systemctl restart NetworkManager
 
 ```bash
 # Make sure scripts are executable
-chmod +x ~/VoidPWN/*.sh
+chmod +x ~/VoidPWN/voidpwn.sh ~/VoidPWN/scripts/*/*.sh
 
 # Run with sudo for system changes
-sudo ./setup.sh
+sudo ./scripts/core/setup.sh
 ```
 
 ### Out of Space
@@ -326,14 +326,14 @@ sudo apt autoremove
 ```bash
 cd ~/VoidPWN
 git pull
-chmod +x *.sh
+chmod +x *.sh */*/*.sh
 ```
 
 ---
 
 ## Need Help?
 
-1. Check [QUICKSTART.md](QUICKSTART.md)
+1. Check [docs/QUICKSTART.md](docs/QUICKSTART.md)
 2. Review script help: `./script.sh --help`
 3. Check Kali docs: https://www.kali.org/docs/
 
