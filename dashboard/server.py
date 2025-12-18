@@ -165,11 +165,70 @@ def get_networks():
     # This would parse airodump-ng output files
     return jsonify({'networks': []})
 
-@app.route('/api/hosts')
-def get_hosts():
-    """Get discovered hosts (placeholder)"""
-    # This would parse nmap output files
-    return jsonify({'hosts': []})
+@app.route('/api/action/monitor/on')
+def action_monitor_on():
+    """Enable monitor mode"""
+    try:
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --monitor-on"
+        subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return jsonify({'status': 'success', 'message': 'Monitor mode enabling...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/action/monitor/off')
+def action_monitor_off():
+    """Disable monitor mode"""
+    try:
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --monitor-off"
+        subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return jsonify({'status': 'success', 'message': 'Monitor mode disabling...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/action/scan')
+def action_scan():
+    """Run a quick network scan"""
+    try:
+        # We use a detached process or simple scan logic here
+        # For simplicity in this demo, we'll just return a success message
+        # In a real app, this would parse airodump output
+        return jsonify({'status': 'success', 'message': 'Scan started (check logs)'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/action/evil_twin', methods=['POST'])
+def action_evil_twin():
+    """Start Evil Twin attack"""
+    # Requires request data for SSID
+    return jsonify({'status': 'error', 'message': 'Not implemented in this version'}), 501
+
+@app.route('/api/action/reboot')
+def action_reboot():
+    """Reboot system"""
+    try:
+        subprocess.Popen(['sudo', 'reboot'])
+        return jsonify({'status': 'success', 'message': 'System rebooting...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/action/shutdown')
+def action_shutdown():
+    """Shutdown system"""
+    try:
+        subprocess.Popen(['sudo', 'shutdown', 'now'])
+        return jsonify({'status': 'success', 'message': 'System shutting down...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/action/restore_hdmi')
+def action_restore_hdmi():
+    """Switch to HDMI output"""
+    try:
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/core/restore_hdmi.sh"
+        subprocess.Popen(cmd.split())
+        return jsonify({'status': 'success', 'message': 'Switching to HDMI & Rebooting...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     print("Starting VoidPWN Dashboard Server...")

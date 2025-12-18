@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -112,7 +113,8 @@
             font-size: 11px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 5px;
             text-align: left;
             border: 1px solid #00ff00;
@@ -193,8 +195,16 @@
         }
 
         @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
         }
 
         .metric {
@@ -224,20 +234,21 @@
             .grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .header-info {
                 flex-direction: column;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
             <div class="ascii-logo">
-╦  ╦┌─┐┬┌┬┐╔═╗╦ ╦╔╗╔  ╔╦╗┌─┐┌─┐┬ ┬┌┐ ┌─┐┌─┐┬─┐┌┬┐
-╚╗╔╝│ │││ ││╠═╝║║║║║║   ║║├─┤└─┐├─┤├┴┐│ │├─┤├┬┘ ││
- ╚╝ └─┘┴└─┘┴╩  ╚╩╝╝╚╝  ═╩╝┴ ┴└─┘┴ ┴└─┘└─┘┴ ┴┴└──┴┘
+                ╦ ╦┌─┐┬┌┬┐╔═╗╦ ╦╔╗╔ ╔╦╗┌─┐┌─┐┬ ┬┌┐ ┌─┐┌─┐┬─┐┌┬┐
+                ╚╗╔╝│ │││ ││╠═╝║║║║║║ ║║├─┤└─┐├─┤├┴┐│ │├─┤├┬┘ ││
+                ╚╝ └─┘┴└─┘┴╩ ╚╩╝╝╚╝ ═╩╝┴ ┴└─┘┴ ┴└─┘└─┘┴ ┴┴└──┴┘
             </div>
             <div class="header-info">
                 <div class="stat">STATUS: <span id="status" class="blink">ACTIVE</span></div>
@@ -248,11 +259,36 @@
             </div>
         </header>
 
-        <div style="text-align: center; margin-bottom: 15px;">
-            <button onclick="refreshAll()">REFRESH ALL</button>
-            <button onclick="showCaptures()">VIEW CAPTURES</button>
-            <button onclick="showRecon()">VIEW RECON</button>
-            <button onclick="clearLogs()">CLEAR LOGS</button>
+        <div class="grid">
+            <div class="panel" style="grid-column: 1 / -1; border-color: #00ffff;">
+                <div class="panel-header" style="color: #00ffff; border-color: #00ffff;">[CONTROL PANEL]</div>
+                <div class="panel-content" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                    <div style="border: 1px solid #00ffff; padding: 10px; width: 100%; max-width: 300px;">
+                        <div style="text-align: center; margin-bottom: 5px; color: #00ffff;">POWER</div>
+                        <button onclick="controlAction('reboot')" style="color: #ffaa00; border-color: #ffaa00;">REBOOT
+                            SYSTEM</button>
+                        <button onclick="controlAction('shutdown')"
+                            style="color: #ff0000; border-color: #ff0000;">SHUTDOWN</button>
+                        <div style="margin-top: 5px; border-top: 1px dashed #00ffff; padding-top: 5px;">
+                            <button onclick="controlAction('restore_hdmi')" style="width: 100%;">SWITCH TO HDMI</button>
+                        </div>
+                    </div>
+
+                    <div style="border: 1px solid #00ffff; padding: 10px; width: 100%; max-width: 300px;">
+                        <div style="text-align: center; margin-bottom: 5px; color: #00ffff;">WIFI TOOLS</div>
+                        <button onclick="controlAction('monitor/on')">MONITOR ON</button>
+                        <button onclick="controlAction('monitor/off')">MONITOR OFF</button>
+                        <button onclick="controlAction('scan')">QUICK SCAN</button>
+                    </div>
+
+                    <div style="border: 1px solid #00ffff; padding: 10px; width: 100%; max-width: 300px;">
+                        <div style="text-align: center; margin-bottom: 5px; color: #00ffff;">DATA</div>
+                        <button onclick="refreshAll()">REFRESH ALL</button>
+                        <button onclick="showCaptures()">VIEW CAPTURES</button>
+                        <button onclick="clearLogs()">CLEAR LOGS</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="grid">
@@ -266,7 +302,7 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="cpu-bar" style="width: 0%"></div>
                     </div>
-                    
+
                     <div class="metric">
                         <span>Memory:</span>
                         <span id="memory">0 MB / 0 MB</span>
@@ -274,7 +310,7 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="mem-bar" style="width: 0%"></div>
                     </div>
-                    
+
                     <div class="metric">
                         <span>Disk:</span>
                         <span id="disk">0 GB / 0 GB</span>
@@ -400,13 +436,13 @@
                     document.getElementById('uptime').textContent = data.uptime || 'N/A';
                     document.getElementById('temp').textContent = data.temp || 'N/A';
                     document.getElementById('adapter').textContent = data.adapter || 'N/A';
-                    
+
                     document.getElementById('cpu').textContent = data.cpu + '%';
                     document.getElementById('cpu-bar').style.width = data.cpu + '%';
-                    
+
                     document.getElementById('memory').textContent = data.memory;
                     document.getElementById('mem-bar').style.width = data.memPercent + '%';
-                    
+
                     document.getElementById('disk').textContent = data.disk;
                     document.getElementById('disk-bar').style.width = data.diskPercent + '%';
                 })
@@ -481,6 +517,25 @@
                 .catch(e => addLog('error', 'Failed to load captures'));
         }
 
+        // Handle control actions
+        function controlAction(action) {
+            if (action === 'reboot' || action === 'shutdown') {
+                if (!confirm('Are you sure you want to ' + action + '?')) return;
+            }
+
+            addLog('info', `Sending action: ${action}...`);
+            fetch(`/api/action/${action}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        addLog('success', data.message);
+                    } else {
+                        addLog('error', data.error || 'Action failed');
+                    }
+                })
+                .catch(e => addLog('error', `Request failed: ${e}`));
+        }
+
         // Show recon results
         function showRecon() {
             addLog('info', 'Loading recon results...');
@@ -495,7 +550,7 @@
         // Initialize
         updateSystemInfo();
         updateStats();
-        
+
         // Auto-refresh every 5 seconds
         setInterval(() => {
             updateSystemInfo();
@@ -503,4 +558,5 @@
         }, 5000);
     </script>
 </body>
+
 </html>
