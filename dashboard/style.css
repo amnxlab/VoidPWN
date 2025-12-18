@@ -186,11 +186,17 @@ nav {
 /* Content Area */
 main {
     flex: 1;
-    overflow-y: hidden;
+    overflow: hidden;
     padding: 10px;
     display: grid;
-    grid-template-columns: 1fr 200px;
+    grid-template-columns: 1fr 250px;
     gap: 10px;
+}
+
+.content-left {
+    overflow-y: auto;
+    height: 100%;
+    padding-right: 5px;
 }
 
 .hud-footer {

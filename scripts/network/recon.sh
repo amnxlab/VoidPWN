@@ -63,7 +63,8 @@ quick_scan() {
     log_info "Output: $output"
     echo ""
     
-    nmap -sn "$target" | tee "$output"
+    # Fast port scan (Top 100 ports)
+    nmap -T4 -F --open "$target" -oN "$output"
     
     log_success "Scan complete"
 }

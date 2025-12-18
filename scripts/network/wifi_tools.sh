@@ -137,15 +137,18 @@ disable_monitor_mode() {
     log_success "Monitor mode disabled"
 }
 
-# Scan for networks
+# Scan for networks (Headless for dashboard)
 scan_networks() {
+    local duration="${1:-15}"
+    local output_file="${2:-$OUTPUT_DIR/scan_results}"
+    
     enable_monitor_mode
     
-    log_info "Scanning for WiFi networks..."
-    log_warning "Press Ctrl+C to stop scanning"
-    echo ""
+    log_info "Scanning for WiFi networks for ${duration}s..."
+    log_warning "Results will be saved to ${output_file}.csv"
     
-    airodump-ng "$MONITOR_INTERFACE"
+    # Run airodump-ng for a limited time and exit
+    sudo timeout "$duration" airodump-ng "$MONITOR_INTERFACE" -w "$output_file" --output-format csv
 }
 
 # Capture handshake
@@ -408,7 +411,7 @@ main() {
     
     case "$1" in
         --scan)
-            scan_networks
+            scan_networks "$2" "$3"
             ;;
         --handshake)
             capture_handshake "$2" "$3" "$4"

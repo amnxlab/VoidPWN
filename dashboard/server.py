@@ -61,7 +61,7 @@ def parse_inventory_info(line):
         # but we can look for specific tools like airodump or nmap
         pass
 
-def run_proc_and_capture(cmd_str, log_file=None):
+def run_proc_and_capture(cmd_str, log_file=None, report_id=None):
     """Run a process in the background and capture its output to LIVE_LOGS and optionally a file"""
     try:
         if not cmd_str.startswith('stdbuf'):
@@ -105,6 +105,9 @@ def run_proc_and_capture(cmd_str, log_file=None):
                     break
                     
             add_live_log(f"✅ MISSION COMPLETE: {mission_name.upper()}", "success")
+            
+            if report_id:
+                reporter.update_status(report_id, "Completed")
             
         t = threading.Thread(target=capture, daemon=True)
         t.start()
@@ -840,16 +843,16 @@ def action_wifite():
     """Launch automated Wifite attack"""
     log_file = gen_log_name("wifite")
     try:
-        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --auto-attack"
-        run_proc_and_capture(cmd, log_file=log_file)
-        
-        reporter.add_report(
+        report = reporter.add_report(
             "WIFI (AUTO-ATTACK)", 
             "ALL", 
             "Started", 
             "Automated Wifite Attack",
             log_file=log_file
         )
+        
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --auto-attack"
+        run_proc_and_capture(cmd, log_file=log_file, report_id=report['id'])
         add_live_log("WIFITE AUTO-ATTACK STARTED", "info")
         return jsonify({'status': 'success', 'message': 'Launched Wifite Auto-Attack'})
     except Exception as e:
@@ -868,16 +871,18 @@ def action_recon():
     try:
         log_file = gen_log_name(f"recon_{mode}")
         flag = f"--{mode}"
+        flag = f"--{mode}"
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/recon.sh {flag} \"{target}\""
-        run_proc_and_capture(cmd, log_file=log_file)
         
-        reporter.add_report(
+        report = reporter.add_report(
             f"RECON ({mode.upper()})", 
             target, 
             "Started", 
             f"Mode: {mode.upper()}",
             log_file=log_file
         )
+        
+        run_proc_and_capture(cmd, log_file=log_file, report_id=report['id'])
         return jsonify({'status': 'success', 'message': f'Starting {mode} scan on {target}...'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -978,8 +983,8 @@ def run_scenario(name, cmd):
     """Helper to run a scenario and log it"""
     log_file = gen_log_name(name)
     try:
-        run_proc_and_capture(cmd, log_file=log_file)
-        reporter.add_report(f"SCENARIO ({name.upper()})", name, "Started", f"Launched scenario: {name}", log_file=log_file)
+        report = reporter.add_report(f"SCENARIO ({name.upper()})", name, "Started", f"Launched scenario: {name}", log_file=log_file)
+        run_proc_and_capture(cmd, log_file=log_file, report_id=report['id'])
         add_live_log(f"SCENARIO STARTED: {name}", "success")
         return jsonify({'status': 'success', 'message': f'Scenario {name} started in background'})
     except Exception as e:
