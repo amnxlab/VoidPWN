@@ -143,10 +143,26 @@ Choose from menu:
 2. Social Engineering Toolkit
 3. Post-exploitation frameworks
 4. Forensics tools
-5. Reverse engineering tools
-6. Mobile analysis tools
+### 6. Critical Verification (BEFORE LCD Install)
+**Do not skip this step.** You must verify the system works *before* you break the video output by installing LCD drivers.
 
-### 6. Install LCD Display (Required for Touch)
+1. Run the main tool:
+   ```bash
+   ./voidpwn.sh
+   ```
+2. Select Option **[T] Run Diagnostics**.
+3. Verify:
+   - [x] Dependencies are [OK]
+   - [x] External Adapter is [OK] (if plugged in)
+   - [x] Internet is [OK]
+4. **Test the Dashboard (Headless)**:
+   - Select **[9] Web Dashboard** -> **[1] Start**.
+   - Open `http://<PI_IP>:5000` on your phone/laptop.
+   - If it loads, **Success**. You can now install the screen.
+
+---
+
+### 7. Install LCD Display (Required for Touch)
 **WARNING:** This step will reboot your Pi and switch output from HDMI to the LCD.
 
 ```bash
