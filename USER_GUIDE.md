@@ -1,71 +1,65 @@
 # Technical Operational Reference
 
-This document provides a technical breakdown of the VoidPWN platform's underlying scripts and automation logic. It is intended for users requiring direct CLI access or a deeper understanding of system execution.
+This document provides a low-level technical mapping of VoidPWN's core scripts and their corresponding CLI parameters. It is intended for advanced users requiring direct script execution or system customization.
 
 ---
 
-## Scanning and Reconnaissance
+## 📡 Network Reconnaissance (`recon.sh`)
 
-### 1. Network Discovery
-The network discovery module (`scripts/network/recon.sh`) utilizes Nmap for asset identification:
+The `recon.sh` script manages all Layer 3 and Layer 4 scanning operations.
 
-- **Host Discovery**:
-  - Command: `nmap -sn <target>`
-  - Objective: Subnet mapping via ARP and ICMP requests without port scanning.
-- **Aggressive Enumeration**:
-  - Command: `nmap -sV -sC -O -A -p- <target>`
-  - Objective: Comprehensive service versioning (`-sV`), script execution (`-sC`), OS fingerprinting (`-O`), and full 65535 port coverage (`-p-`).
-
-### 2. Reconnaissance Profiles
-- **Stealth Assessment**: 
-  - Implementation: `nmap -sS -T2 -f -D RND:10`
-  - Logic: SYN stealth scanning with fragmented headers and decoy addresses to bypass IDS/Firewall filtering.
-- **Vulnerability Scanning**:
-  - Implementation: `nmap --script vuln`
-  - Logic: Automated CVE discovery via the Nmap Scripting Engine.
+- **Fast Discovery**: `sudo ./recon.sh --quick <TARGET>`
+  - Executes: `nmap -sn <TARGET>`
+- **Full Enumeration**: `sudo ./recon.sh --full <TARGET>`
+  - Executes: `nmap -sV -sC -O -A -p- <TARGET>`
+- **Stealth Assessment**: `sudo ./recon.sh --stealth <TARGET>`
+  - Executes: `nmap -sS -T2 -f -D RND:10 <TARGET>`
+- **Vulnerability Check**: `sudo ./recon.sh --vuln <TARGET>`
+  - Executes: `nmap --script vuln <TARGET>`
+- **Web Fuzzing**: `sudo ./recon.sh --web <URL> [WORDLIST]`
+  - Executes: `gobuster dir -u <URL> -w [WORDLIST] -x php,html,txt,js`
 
 ---
 
-## Wireless Assessment Vectors
+## 🎯 Wireless Assessment (`wifi_tools.sh`)
 
-Wireless operations are managed via `scripts/network/wifi_tools.sh`, integrating several specialized Layer 2 tools:
+The `wifi_tools.sh` script handles monitor mode transition and Layer 2 assessment vectors.
 
-### Primary Tools
-- **Deauthentication**: `aireplay-ng --deauth 0 -a <BSSID>`
-- **EAPOL Interception**: `airodump-ng -c <ch> --bssid <BSSID> -w <output>`
-- **RSN IE Extraction (PMKID)**: `hcxdumptool -o <output> -i <iface> --enable_status=1`
-- **WPS PIN Recovery**: `reaver -i <iface> -b <BSSID> -K 1 -vv`
-
-### Protocol Stress Testing
-- **Beacon Flooding**: `mdk4 <iface> b`
-- **Association Flooding**: `mdk4 <iface> a -a <BSSID>`
-
----
-
-## Automation Framework
-
-Scenarios are orchestrated through `scripts/network/scenarios.sh`, providing high-level task management.
-
-### Wireless Security Mission
-1.  **Interface Configuration**: Toggles the chipset to monitor mode.
-2.  **Environmental Survey**: 10-minute discovery phase via `airodump-ng`.
-3.  **Targeted Capture**: Sequential execution of PMKID and handshake capture logic across high-signal targets.
-
-### Web Intelligence Mission
-1.  **Asset Identification**: Targeted scanning for ports 80, 443, and 8080.
-2.  **Service Fingerprinting**: Technical identification of CMS and technology stacks via `WhatWeb`.
-3.  **Fuzzing and Auditing**: Parallelized `GoBuster` and `Nikto` sessions for comprehensive application-level discovery.
+- **Interface Control**: 
+  - `sudo ./wifi_tools.sh --monitor-on` (Starts `airmon-ng`)
+  - `sudo ./wifi_tools.sh --monitor-off` (Stops `airmon-ng`)
+- **Handshake Interception**: `sudo ./wifi_tools.sh --handshake <BSSID> <CH>`
+  - Orchestrates `airodump-ng` and `aireplay-ng --deauth 10`.
+- **Clientless Capture**: `sudo ./wifi_tools.sh --pmkid [DURATION]`
+  - Executes `hcxdumptool` for specified duration.
+- **WPS PIN Recovery**: `sudo ./wifi_tools.sh --pixie <BSSID>`
+  - Executes `reaver` with Pixie-Dust entropy attack enabled (`-K 1`).
+- **MDK4 Stress Test**:
+  - `sudo ./wifi_tools.sh --beacon [FILE]` (Beacon flood)
+  - `sudo ./wifi_tools.sh --auth [BSSID]` (Association flood)
 
 ---
 
-## System Architecture
+## 🤖 Workflow Automation (`scenarios.sh`)
 
-### Process Management
-The Flask backend (`server.py`) manages tool execution using asynchronous `subprocess.Popen` calls. This methodology ensures that the web interface remains responsive during long-running background processes.
+Scenarios provide pre-configured missions that chain multiple scripts and parameters.
 
-### Data Persistence
-- **Host Inventory**: Discovered hosts and service metadata are persisted in `output/devices.json`.
-- **Reports**: Standard output and error streams from assessment tools are captured and archived in the reporting directory for historical review.
+- **Tiered WiFi Audit**: `sudo ./scenarios.sh` (Manual Menu Option 1)
+  - Logic: Monitor ON -> 10m Airodump scan -> Target identification -> Sequential PMKID/Handshake attempts.
+- **Stealth Recon Mission**: `sudo ./scenarios.sh` (Manual Menu Option 4)
+  - Logic: Fragmentation + Timing T2 + Decoy scanning across specified target range.
+- **Web Application Hunt**: `sudo ./scenarios.sh` (Manual Menu Option 3)
+  - Logic: Port 80/443 discovery -> Technology identification (WhatWeb) -> Sequential GoBuster/Nikto/SQLMap audits.
 
 ---
-*Operational reference conclude. For theoretical analysis, refer to [ATTACK_REFERENCE.md](./docs/ATTACK_REFERENCE.md).*
+
+## ⚙️ System Architecture
+
+### Dashboard Process Handling
+The Flask application (`server.py`) interacts with these scripts using `subprocess.Popen`. This allows for non-blocking execution where the UI receives the PID immediately, while the tool continues to stream output to the system logs.
+
+### Inventory Synchronization
+Discovered hosts are persisted in `output/devices.json`. The dashboard uses asynchronous polling to refresh the inventory without requiring a page reload.
+
+---
+*For comprehensive theoretical analysis and flag references, see the [Technical Reference](./docs/TECHNICAL_REFERENCE.md).*

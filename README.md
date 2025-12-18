@@ -54,6 +54,12 @@ sudo python3 server.py
 
 ---
 
+### [Technical Implementation Reference](./docs/TECHNICAL_REFERENCE.md)
+*   Direct mapping of dashboard API endpoints to shell script parameters.
+*   Low-level logic for process management and data persistence.
+
+---
+
 ## Deep Technical Reference
 For detailed script paths and internal configuration logic, refer to the **[Technical User Guide](./USER_GUIDE.md)**.
 

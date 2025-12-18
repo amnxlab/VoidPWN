@@ -1,47 +1,48 @@
 # Scenario Automation Guide
 
-Automated scenarios in VoidPWN are designed to orchestrate complex toolchains into streamlined workflows. These scenarios leverage a state-machine logic to execute multi-stage security assessments with minimal manual intervention.
+Automated scenarios in VoidPWN coordinate multiple security tools into single-click workflows. This document details the step-by-step orchestration logic used in `scripts/network/scenarios.sh`.
 
 ---
 
-## Technical Workflows
+## 🛠️ Scenario Orchestration Logic
 
 ### 1. Wireless Security Audit
-*   **Objective**: Automated identification and vulnerability assessment of local wireless access points.
-*   **Toolchain**: `airodump-ng` -> `hcxdumptool` -> `aireplay-ng` -> `aircrack-ng`.
-*   **Workflow Logic**:
-    1.  **Passive Discovery**: Interface initialization and background sniffing to catalogue BSSIDs and signal metrics.
-    2.  **Clientless Assessment**: Execution of `hcxdumptool` for a defined duration to attempt PMKID hash extraction from all detected APs.
-    3.  **Active Assessment**: For networks with active clients, the platform executes targeted deauthentication bursts to capture the WPA 4-way handshake.
-*   **Result Persistence**: All captured hashes and logs are timestamped and archived for offline analysis.
+- **Objective**: Sequential assessment of all local BSSIDs.
+- **Workflow Steps**:
+  1.  **Monitor Mode**: Calls `wifi_tools.sh --monitor-on` to initialize the interface.
+  2.  **Discovery Phase**: Executes `timeout [duration] airodump-ng -w [output] --output-format csv wlan1mon`.
+  3.  **Target Aggregation**: The script parses `scan-01.csv` to catalogue available networks and their signal metrics.
+  4.  **Capture Phase**: Attempts PMKID extraction and WPA handshake capture on high-signal targets.
+  5.  **Audit Termination**: Calls `wifi_tools.sh --monitor-off` to restore standard networking services.
 
 ### 2. Stealth Network Reconnaissance
-*   **Objective**: Subnet mapping and service identification in monitored or restrictive environments.
-*   **Tool**: `nmap` (Configured for evasion).
-*   **Evasion Logic**:
-    - **Timing (T2)**: Implementation of a polite timing template to reduce the frequency of probes, staying below most IDS rate-limiting thresholds.
-    - **Decoy Scanning**: Inclusion of randomized decoy IP addresses in the packet headers to obscure the origin of the scan.
-*   **Workflow Logic**: The scan is executed within a detached terminal session, ensuring persistence even if the user interface connection is interrupted.
+- **Objective**: Asset mapping with significant focus on IDS/IPS bypass.
+- **Workflow Steps**:
+  1.  **SYN Probing**: `nmap -sS -T2 -f --data-length 25 -D RND:10 [target]`. Uses 25-byte data padding and 10 random decoys.
+  2.  **Service Fingerprinting**: Slow interrogation using `nmap -sV -T1 --version-intensity 0 [target]`. 
+  3.  **Encapsulation**: The entire workflow is executed within a detached process, allowing the operator to terminate the session without interrupting the scan.
 
 ### 3. Web Service Intelligence
-*   **Objective**: Identification and vulnerability scanning of HTTP/HTTPS interfaces across the network.
-*   **Toolchain**: `nmap` -> `WhatWeb` -> `GoBuster` -> `Nikto`.
-*   **Workflow Logic**:
-    1.  **Service Discovery**: Targeted port scanning for common web interfaces (80, 443, 8080, 8443).
-    2.  **Fingerprinting**: Technical identification of the technology stack (e.g., PHP version, CMS type, web server header).
-    3.  **Directory Fuzzing**: Brute-force discovery of unlinked directories and sensitive files.
-    4.  **Security Audit**: Execution of comprehensive vulnerability signatures to identify known server-side flaws.
+- **Objective**: Full-stack audit of HTTP/HTTPS services.
+- **Workflow Steps**:
+  1.  **Port Discovery**: `nmap -p 80,443,8080,8443 --open [network]`.
+  2.  **Asset Identification**: For each identified host, executes `WhatWeb` to determine the technology stack.
+  3.  **Directory Brute-Force**: Launches `GoBuster` dir fuzzing:
+      ```bash
+      gobuster dir -u http://[host] -w /usr/share/wordlists/dirb/common.txt
+      ```
+  4.  **Vulnerability Sweep**: Sequential execution of `Nikto` for generic flaws and `SQLMap --crawl=2` for database vulnerabilities.
 
 ---
 
-## Scenario Comparison Matrix
+## 📊 Comparison Matrix
 
-| Scenario Profile | Execution Speed | Detection Risk | Primary Focus |
-| :--- | :--- | :--- | :--- |
-| **Wireless Audit** | Moderate | High (Active) | WPA/WPS Vulnerabilities |
-| **Stealth Recon** | Low | Very Low | IDS Evasion |
-| **Web Service Hunt** | High | Moderate | Application Vulnerabilities |
-| **Quick Discovery** | Very High | Moderate | Asset Inventory |
+| Scenario Profile | Key Tools Chained | Orchestration Logic |
+| :--- | :--- | :--- |
+| **Wireless Audit** | airodump, hcxdumptool, aireplay-ng | Signal-priority loop |
+| **Stealth Recon** | nmap (Evasive flags) | Polite timing + False decoys |
+| **Web Service Hunt** | nmap, gobuster, nikto, sqlmap | Recursive discovery |
+| **Quick Discovery** | nmap -sn, nmap -T4 | Optimized parallel probing |
 
 ---
-*For a comprehensive theoretical analysis, refer to the [Attack and Feature Reference](./ATTACK_REFERENCE.md).*
+*For direct API mappings and script parameter definitions, see the [Technical Reference](./TECHNICAL_REFERENCE.md).*
