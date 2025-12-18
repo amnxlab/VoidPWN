@@ -106,6 +106,15 @@ install_wifi_tools() {
         hostapd \
         dnsmasq
     
+    # Advanced Wireless Tools
+    log_info "Installing wifiphisher..."
+    pip3 install wifiphisher --break-system-packages || pip3 install wifiphisher
+    
+    log_info "Installing fluxion..."
+    if [ ! -d "/opt/fluxion" ]; then
+        git clone https://github.com/FluxionNetwork/fluxion.git /opt/fluxion
+    fi
+    
     log_success "WiFi tools installed"
 }
 
@@ -168,6 +177,59 @@ install_web_tools() {
         whatweb
     
     log_success "Web tools installed"
+}
+
+# Install forensics tools
+install_forensics_tools() {
+    log_info "Installing forensics tools..."
+    
+    apt install -y \
+        autopsy \
+        sleuthkit \
+        volatility3 \
+        binwalk \
+        foremost \
+        exiftool
+    
+    log_success "Forensics tools installed"
+}
+
+# Install reverse engineering tools
+install_re_tools() {
+    log_info "Installing reverse engineering tools..."
+    
+    apt install -y \
+        radare2 \
+        ghidra \
+        gdb \
+        ltrace \
+        strace \
+        objdump
+    
+    log_success "Reverse engineering tools installed"
+}
+
+# Install mobile tools
+install_mobile_tools() {
+    log_info "Installing mobile analysis tools..."
+    
+    apt install -y \
+        apktool \
+        dex2jar \
+        jadx
+    
+    log_success "Mobile tools installed"
+}
+
+# Install social engineering & post-exploitation tools
+install_advanced_frameworks() {
+    log_info "Installing SET and Post-Exploitation frameworks..."
+    
+    apt install -y \
+        set \
+        powershell-empire
+    
+    log_success "Advanced frameworks installed"
 }
 
 # Configure WiFi adapter
@@ -287,6 +349,10 @@ main() {
     install_password_tools
     install_exploit_tools
     install_web_tools
+    install_forensics_tools
+    install_re_tools
+    install_mobile_tools
+    install_advanced_frameworks
     configure_wifi_adapter
     install_pisugar
     configure_autologin
@@ -303,7 +369,6 @@ main() {
     echo "  1. Reboot the system: sudo reboot"
     echo "  2. Plug in your ALFA WiFi adapter"
     echo "  3. Run: voidpwn (to launch the menu)"
-    echo "  4. Install LCD last: sudo ./scripts/core/install_lcd.sh"
     echo ""
     log_warning "Reboot recommended to apply all changes"
 }
