@@ -30,10 +30,38 @@ def add_live_log(msg, type="info"):
     timestamp = datetime.now().strftime('%H:%M:%S')
     LIVE_LOGS.append({'time': timestamp, 'msg': msg, 'type': type})
 
-def run_proc_and_capture(cmd_str):
-    """Run a process in the background and capture its output to LIVE_LOGS"""
+def parse_inventory_info(line):
+    """Parse a line of output for device info and update inventory"""
+    # Look for Nmap patterns: "Nmap scan report for 192.168.1.1" or "Nmap scan report for host (192.168.1.1)"
+    if "Nmap scan report for" in line:
+        match = re.search(r"for ([\d\.]+)", line)
+        ip = match.group(1) if match else None
+        if not ip:
+            match = re.search(r"for (.*) \(([\d\.]+)\)", line)
+            if match:
+                hostname = match.group(1)
+                ip = match.group(2)
+                device_manager.add_device(ip, hostname=hostname)
+                return
+        if ip:
+            device_manager.add_device(ip)
+
+    # Look for pure IP patterns in typical tool outputs
+    # e.g., "[+] Host: 192.168.1.1" or "IP: 192.168.1.1"
+    ip_match = re.search(r"(?:Host|IP|Target):\s*([\d\.]+)", line, re.I)
+    if ip_match:
+        device_manager.add_device(ip_match.group(1))
+
+    # Look for MAC patterns
+    mac_match = re.search(r"([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})", line)
+    if mac_match:
+        # If we have a MAC but no IP on this line, it's hard to attribute without more context,
+        # but we can look for specific tools like airodump or nmap
+        pass
+
+def run_proc_and_capture(cmd_str, log_file=None):
+    """Run a process in the background and capture its output to LIVE_LOGS and optionally a file"""
     try:
-        # Force line buffering at the system level
         if not cmd_str.startswith('stdbuf'):
             cmd_str = f"stdbuf -oL -eL {cmd_str}"
             
@@ -48,22 +76,46 @@ def run_proc_and_capture(cmd_str):
         )
         
         def capture():
+            log_path = os.path.join(LOGS_DIR, log_file) if log_file else None
+            f_log = open(log_path, 'w') if log_path else None
+            
             for line in iter(proc.stdout.readline, ""):
                 if line:
-                    add_live_log(line.strip())
+                    clean_line = line.strip()
+                    add_live_log(clean_line)
+                    parse_inventory_info(clean_line) # Live inventory update
+                    if f_log:
+                        f_log.write(line)
+                        f_log.flush()
+            
             proc.stdout.close()
             proc.wait()
-            # Prominent completion message
-            cmd_name = cmd_str.split()[-1].split('/')[-1].replace('"','')
-            add_live_log(f"✅ MISSION COMPLETE: {cmd_name}", "success")
             
-        # Ensure we don't have zombie processes stalling
+            if f_log:
+                f_log.close()
+            
+            # Extract mission name from command string
+            parts = cmd_str.split()
+            mission_name = "Mission"
+            for p in parts:
+                if not p.startswith('-') and p not in ['sudo', 'stdbuf', '-oL', '-eL']:
+                    mission_name = p.split('/')[-1].replace('"','')
+                    break
+                    
+            add_live_log(f"✅ MISSION COMPLETE: {mission_name.upper()}", "success")
+            
         t = threading.Thread(target=capture, daemon=True)
         t.start()
         return proc
     except Exception as e:
         add_live_log(f"Error starting process: {str(e)}", "error")
         return None
+
+def gen_log_name(action):
+    """Generate a unique filename for a mission log"""
+    ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+    clean_action = action.lower().replace(' ', '_')
+    return f"{clean_action}_{ts}.txt"
 
 # --- Reporting System ---
 class ReportManager:
@@ -87,14 +139,15 @@ class ReportManager:
         except Exception as e:
             print(f"Failed to save report: {e}")
 
-    def add_report(self, action_type, target, status="Running", details=""):
+    def add_report(self, action_type, target, status="Running", details="", log_file=None):
         report = {
             "id": str(uuid.uuid4()),
             "timestamp": datetime.now().isoformat(),
             "type": action_type,
             "target": target,
             "status": status,
-            "details": details
+            "details": details,
+            "log_file": log_file
         }
         self.reports.insert(0, report) # Prepend
         self._save()
@@ -201,10 +254,12 @@ os.environ['VOIDPWN_DIR'] = VOIDPWN_DIR
 # Paths to data
 CAPTURES_DIR = os.path.join(VOIDPWN_DIR, 'output', 'captures')
 RECON_DIR = os.path.join(VOIDPWN_DIR, 'output', 'recon')
+LOGS_DIR = os.path.join(VOIDPWN_DIR, 'output', 'logs')
 
 # Ensure directories exist
 os.makedirs(CAPTURES_DIR, exist_ok=True)
 os.makedirs(RECON_DIR, exist_ok=True)
+os.makedirs(LOGS_DIR, exist_ok=True)
 
 # Initialize Reporter
 REPORTS_FILE = os.path.join(VOIDPWN_DIR, 'output', 'reports.json')
@@ -406,33 +461,20 @@ def scan_devices():
                 local_ip = ip_result.stdout.strip().split()[0]
                 target_subnet = '.'.join(local_ip.split('.')[:-1]) + '.0/24'
         
-        # Perform nmap scan
-        log_msg = f"Starting {mode} network discovery on {target_subnet}..."
-        reporter.add_report("SCAN", "Local Network", "Running", log_msg)
-        
+        # Perform nmap scan via background capture
+        log_file = gen_log_name(f"discovery_{mode}")
         if mode == 'full':
-            cmd = ['sudo', 'nmap', '-sV', '-T4', target_subnet]
+            cmd_list = ['sudo', 'nmap', '-sV', '-T4', target_subnet]
         else:
-            cmd = ['sudo', 'nmap', '-sn', target_subnet]
-            
-        result = subprocess.run(cmd, capture_output=True, text=True)
+            cmd_list = ['sudo', 'nmap', '-sn', target_subnet]
         
-        # Automated Inventory Addition
-        found_count = 0
-        for line in result.stdout.split('\n'):
-            if "Nmap scan report for" in line:
-                match = re.search(r"for ([\d\.]+)", line)
-                current_ip = match.group(1) if match else None
-                if not current_ip:
-                    match = re.search(r"for (.*) \(([\d\.]+)\)", line)
-                    current_ip = match.group(2) if match else None
-                
-                if current_ip:
-                    device_manager.add_device(current_ip)
-                    found_count += 1
+        cmd = " ".join(cmd_list)
+        run_proc_and_capture(cmd, log_file=log_file)
         
-        reporter.add_report("SCAN", "Local Network", "Success", f"Discovered and added {found_count} devices to inventory.")
-        return jsonify({'status': 'success', 'count': found_count, 'subnet': target_subnet})
+        reporter.add_report("SCAN", target_subnet, "Started", f"Network discovery ({mode})", log_file=log_file)
+        add_live_log(f"NETWORK DISCOVERY STARTED: {target_subnet}", "info")
+        
+        return jsonify({'status': 'success', 'message': f'Discovery started on {target_subnet}'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -532,6 +574,18 @@ def select_target():
 def get_live_logs():
     """Get the latest logs for the HUD"""
     return jsonify({'logs': list(LIVE_LOGS)})
+
+@app.route('/api/logs/view/<filename>')
+def view_full_log(filename):
+    """Read the content of a specific log file"""
+    # Security: strip any path traversal attempts
+    safe_name = os.path.basename(filename)
+    log_path = os.path.join(LOGS_DIR, safe_name)
+    
+    if os.path.exists(log_path):
+        with open(log_path, 'r') as f:
+            return jsonify({'content': f.read()})
+    return jsonify({'error': 'Log file not found'}), 404
 
 @app.route('/api/target/current')
 def get_target():
@@ -755,15 +809,17 @@ def action_crack():
             
         latest_cap = max(files, key=os.path.getctime)
         filename = os.path.basename(latest_cap)
+        log_file = gen_log_name("crack")
         
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --crack \"{latest_cap}\""
-        run_proc_and_capture(cmd)
+        run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
             "CRACK", 
             filename, 
             "Started", 
-            "Wordlist attack initiated"
+            "Wordlist attack initiated",
+            log_file=log_file
         )
         add_live_log(f"CRACKING STARTED: {filename}", "info")
         return jsonify({'status': 'success', 'message': f'Cracking {filename}...'})
@@ -773,15 +829,17 @@ def action_crack():
 @app.route('/api/action/wifite')
 def action_wifite():
     """Launch automated Wifite attack"""
+    log_file = gen_log_name("wifite")
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --auto-attack"
-        run_proc_and_capture(cmd)
+        run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
             "WIFITE", 
             "ALL", 
             "Started", 
-            "Automated Wifite Attack"
+            "Automated Wifite Attack",
+            log_file=log_file
         )
         add_live_log("WIFITE AUTO-ATTACK STARTED", "info")
         return jsonify({'status': 'success', 'message': 'Launched Wifite Auto-Attack'})
@@ -799,15 +857,17 @@ def action_recon():
         return jsonify({'error': 'Target required'}), 400
         
     try:
+        log_file = gen_log_name(f"recon_{mode}")
         flag = f"--{mode}"
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/recon.sh {flag} \"{target}\""
-        run_proc_and_capture(cmd)
+        run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
             "RECON", 
             target, 
             "Started", 
-            f"Mode: {mode.upper()}"
+            f"Mode: {mode.upper()}",
+            log_file=log_file
         )
         return jsonify({'status': 'success', 'message': f'Starting {mode} scan on {target}...'})
     except Exception as e:
@@ -819,15 +879,17 @@ def action_pmkid():
     data = request.get_json() or {}
     duration = data.get('duration', 300)
     
+    log_file = gen_log_name("pmkid")
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --pmkid {duration}"
-        run_proc_and_capture(cmd)
+        run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
             "PMKID", 
             "ALL", 
             "Started", 
-            f"Capture running for {duration}s"
+            f"Capture running for {duration}s",
+            log_file=log_file
         )
         return jsonify({'status': 'success', 'message': f'PMKID capture started ({duration}s)...'})
     except Exception as e:
@@ -839,15 +901,17 @@ def action_beacon():
     data = request.get_json() or {}
     ssid_file = data.get('ssid_file', '')
     
+    log_file = gen_log_name("beacon")
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --beacon {ssid_file}"
-        run_proc_and_capture(cmd)
+        run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
             "BEACON_FLOOD", 
             "CHAOS", 
             "Running", 
-            "MDK4 Beacon Flooding active"
+            "MDK4 Beacon Flooding active",
+            log_file=log_file
         )
         return jsonify({'status': 'success', 'message': 'Beacon flood started...'})
     except Exception as e:
@@ -859,15 +923,17 @@ def action_auth_flood():
     data = request.get_json() or {}
     target = data.get('target', '')
     
+    log_file = gen_log_name("auth_flood")
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --auth {target}"
-        run_proc_and_capture(cmd)
+        run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
             "AUTH_FLOOD", 
             target or "ALL", 
             "Running", 
-            "MDK4 Authentication Flooding active"
+            "MDK4 Authentication Flooding active",
+            log_file=log_file
         )
         return jsonify({'status': 'success', 'message': f'Auth flood against {target or "ALL"} started...'})
     except Exception as e:
@@ -882,15 +948,17 @@ def action_pixie():
     if not target:
         return jsonify({'error': 'Target BSSID required'}), 400
         
+    log_file = gen_log_name("pixie")
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --pixie {target}"
-        run_proc_and_capture(cmd)
+        run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
             "PIXIE_DUST", 
             target, 
             "Started", 
-            "WPS Pixie-Dust attack initiated"
+            "WPS Pixie-Dust attack initiated",
+            log_file=log_file
         )
         return jsonify({'status': 'success', 'message': f'Pixie-Dust attack launched on {target}...'})
     except Exception as e:
@@ -899,9 +967,10 @@ def action_pixie():
 # --- Automated Scenario Endpoints ---
 def run_scenario(name, cmd):
     """Helper to run a scenario and log it"""
+    log_file = gen_log_name(name)
     try:
-        run_proc_and_capture(cmd)
-        reporter.add_report("SCENARIO", name, "Started", f"Launched scenario: {name}")
+        run_proc_and_capture(cmd, log_file=log_file)
+        reporter.add_report("SCENARIO", name, "Started", f"Launched scenario: {name}", log_file=log_file)
         add_live_log(f"SCENARIO STARTED: {name}", "success")
         return jsonify({'status': 'success', 'message': f'Scenario {name} started in background'})
     except Exception as e:
@@ -948,10 +1017,11 @@ def action_throttle():
     speed = data.get('speed', '1mbit')
     if not target: return jsonify({'error': 'Target required'}), 400
     
+    log_file = gen_log_name("throttle")
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_throttle.sh {target} {speed}"
-        run_proc_and_capture(cmd)
-        reporter.add_report("THROTTLE", target, "Running", f"Limiting to {speed}")
+        run_proc_and_capture(cmd, log_file=log_file)
+        reporter.add_report("THROTTLE", target, "Running", f"Limiting to {speed}", log_file=log_file)
         return jsonify({'status': 'success', 'message': f'Throttling {target} to {speed}'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500

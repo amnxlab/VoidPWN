@@ -209,6 +209,7 @@
                                         <th>TYPE</th>
                                         <th>TARGET</th>
                                         <th>STATUS</th>
+                                        <th>FULL OUTPUT</th>
                                     </tr>
                                 </thead>
                                 <tbody id="reports-body">
@@ -348,6 +349,18 @@
 
                 <button class="btn" style="width:100%" onclick="saveDeviceMetadata()">SAVE CHANGES</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Log Viewer Modal -->
+    <div class="modal-overlay" id="log-viewer-overlay">
+        <div class="modal" style="max-width: 90%; width: 1000px; height: 80vh; display: flex; flex-direction: column;">
+            <div class="panel-header" style="margin-bottom: 15px;">
+                <h2 id="log-viewer-title" style="font-size:0.9rem">MISSION LOG</h2>
+                <button class="btn" style="padding:5px 10px; font-size:0.7rem" onclick="closeLogViewer()">CLOSE</button>
+            </div>
+            <pre id="log-viewer-content"
+                style="flex:1; overflow-y:auto; background:rgba(0,0,0,0.5); padding:15px; font-family:var(--font-mono); font-size:0.8rem; color:#0e9; border:1px solid var(--border); border-radius:4px;"></pre>
         </div>
     </div>
 

@@ -164,7 +164,7 @@ main {
 }
 
 .hud-footer {
-    height: 180px;
+    height: 250px;
     background: var(--panel-bg);
     border-top: 1px solid var(--border);
     padding: 5px 10px;

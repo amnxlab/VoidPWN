@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadReports();
     setInterval(refreshSystemInfo, 5000);
     setInterval(pollLiveLogs, 1000);
+    setInterval(loadReports, 10000); // Poll reports every 10s
 });
 
 async function checkSelectedDevice() {
@@ -344,6 +345,10 @@ async function pollLiveLogs() {
             container.appendChild(entry);
         });
         container.scrollTop = container.scrollHeight;
+
+        // If logs changed, there might be new devices or report status updates
+        loadDeviceList();
+        loadReports();
     }
 }
 
@@ -355,14 +360,38 @@ async function loadReports() {
     container.innerHTML = '';
     res.reports.forEach(r => {
         const tr = document.createElement('tr');
+        const logBtn = r.log_file ? `<button class="btn" style="padding:2px 8px; font-size:0.6rem" onclick="viewFullLog('${r.log_file}', '${r.type} @ ${r.target}')">VIEW OUTPUT</button>` : '<span style="color:var(--text-dim)">N/A</span>';
+
         tr.innerHTML = `
-            <td>${r.timestamp.split('T')[1].split('.')[0]}</td>
+            <td style="padding:10px">${r.timestamp.split('T')[1].split('.')[0]}</td>
             <td style="color:var(--primary)">${r.type}</td>
             <td>${r.target}</td>
             <td class="${r.status.toLowerCase()}">${r.status}</td>
+            <td>${logBtn}</td>
         `;
         container.appendChild(tr);
     });
+}
+
+async function viewFullLog(filename, title) {
+    const overlay = document.getElementById('log-viewer-overlay');
+    const content = document.getElementById('log-viewer-content');
+    const titleEl = document.getElementById('log-viewer-title');
+
+    titleEl.textContent = `MISSION LOG: ${title}`;
+    content.textContent = 'Loading logs...';
+    overlay.classList.add('active');
+
+    const res = await api(`/api/logs/view/${filename}`);
+    if (res.content) {
+        content.textContent = res.content;
+    } else {
+        content.textContent = `Error: ${res.error || 'Failed to load log content.'}`;
+    }
+}
+
+function closeLogViewer() {
+    document.getElementById('log-viewer-overlay').classList.remove('active');
 }
 
 async function refreshSystemInfo() {
