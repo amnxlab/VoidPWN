@@ -397,15 +397,23 @@ async function runAction(action, data = {}) {
     }
 }
 
-async function switchToTFT() {
-    if (!confirm("This will switch video output to TFT via restore_hdmi.sh and REBOOT the device. Continue?")) return;
+async function stopAttacks() {
+    log('STOPPING ALL ATTACKS...');
+    const res = await api('/api/action/stop', 'POST');
+    if (res.status === 'success') {
+        log('🛑 ALL ATTACKS STOPPED', 'error'); // Red color for visibility
+    } else {
+        alert("Failed to stop: " + res.error);
+    }
+}
 
+async function switchToTFT() {
     log('SWITCHING TO TFT OUTPUT...');
     const res = await api('/api/action/tft', 'POST');
     if (res.status === 'success') {
-        alert("System is rebooting to TFT mode. Please wait...");
+        log('✓ Switching to TFT mode. System will reboot...', 'success');
     } else {
-        alert("Failed to switch: " + res.error);
+        log(`ERROR: ${res.error}`, 'error');
     }
 }
 
