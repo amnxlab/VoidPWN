@@ -734,16 +734,21 @@ def action_display_deauth():
     bssid = CURRENT_TARGET.get('bssid')
     ssid = CURRENT_TARGET.get('essid', 'Unknown')
     
+    channel = CURRENT_TARGET.get('channel', '')
+    
     try:
-        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --deauth {bssid} 0"
-        subprocess.Popen(cmd, shell=True)
+        log_file = gen_log_name(f"deauth_{ssid}")
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --deauth {bssid} 0 {channel}"
         
-        reporter.add_report(
+        report = reporter.add_report(
             "WIFI (DEAUTH)", 
             ssid, 
             "Running", 
-            f"Deauthing BSSID {bssid}"
+            f"Deauthing BSSID {bssid} (Ch {channel})",
+            log_file=log_file
         )
+        
+        run_proc_and_capture(cmd, log_file=log_file, report_id=report['id'])
         
         return jsonify({'status': 'success', 'message': f'Deauthing {bssid}...'})
     except Exception as e:
@@ -797,15 +802,19 @@ def action_handshake():
     ssid = CURRENT_TARGET.get('essid', 'Unknown')
     
     try:
+        log_file = gen_log_name(f"handshake_{ssid}")
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --handshake {bssid} {channel} \"{ssid}\""
-        subprocess.Popen(cmd, shell=True)
         
-        reporter.add_report(
+        report = reporter.add_report(
             "WIFI (HANDSHAKE)", 
             ssid, 
             "Started", 
-            f"Capturing Handshake on Ch {channel}"
+            f"Capturing Handshake on Ch {channel}",
+            log_file=log_file
         )
+        
+        run_proc_and_capture(cmd, log_file=log_file, report_id=report['id'])
+        
         return jsonify({'status': 'success', 'message': f'Capturing handshake for {ssid}...'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500

