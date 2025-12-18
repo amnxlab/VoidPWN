@@ -317,6 +317,17 @@
             <div id="scan-results" class="scan-grid">
                 <!-- Scan Cards -->
             </div>
+
+            <div class="panel" style="margin-top:20px;">
+                <h2>Network Recon (Nmap)</h2>
+                <input type="text" id="recon-target" placeholder="Target IP (e.g. 192.168.1.1)" />
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <button class="btn" onclick="runRecon('quick')">Quick</button>
+                    <button class="btn" onclick="runRecon('full')">Full</button>
+                    <button class="btn" onclick="runRecon('stealth')">Stealth</button>
+                    <button class="btn" onclick="runRecon('vuln')">Vuln</button>
+                </div>
+            </div>
         </div>
 
         <!-- TAB 3: ATTACK -->
@@ -331,6 +342,13 @@
 
                 <button class="btn danger" onclick="runAttack('deauth')">LAUNCH DEAUTH</button>
                 <button class="btn danger" onclick="runAttack('evil_twin')">LAUNCH EVIL TWIN</button>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <button class="btn warning" style="border-color:var(--warning); color:var(--warning)"
+                        onclick="runAttack('handshake')">CAPTURE HS</button>
+                    <button class="btn warning" style="border-color:var(--warning); color:var(--warning)"
+                        onclick="runAttack('crack')">CRACK HS</button>
+                </div>
+                <button class="btn" onclick="runAttack('wifite')">AUTO-PWN (WIFITE)</button>
                 <button class="btn" onclick="stopMonitor()">STOP / RESET</button>
             </div>
             <div class="panel">
@@ -370,6 +388,8 @@
                 </div>
             </div>
             <button class="btn" onclick="api('/api/action/reboot')">REBOOT SYSTEM</button>
+            <button class="btn" style="border-color:var(--text-dim); color:var(--text-dim)"
+                onclick="api('/api/action/restore_hdmi')">SWITCH TO HDMI (DISABLE LCD)</button>
             <button class="btn danger" onclick="api('/api/action/shutdown')">SHUTDOWN</button>
         </div>
     </main>
@@ -495,6 +515,11 @@
             el.classList.add('selected');
             CURRENT_TARGET = net;
 
+            // Pre-fill Recon Input
+            // Heuristic. Airodump doesn't give IP. We just help user context.
+            // If they want to scan it, they might need to find IP first.
+            // But we can put MAC addr for reference or nothing.
+
             // Update Backend
             await api('/api/target/select', 'POST', net);
 
@@ -510,9 +535,17 @@
 
         // 3. Attacks
         async function runAttack(type) {
-            if (!CURRENT_TARGET) return alert("No Target Selected!");
+            if (!CURRENT_TARGET && type !== 'wifite') return alert("No Target Selected!");
             log(`Launching ${type}...`);
             const res = await api('/api/action/' + type, 'POST');
+            if (res.message) log(res.message);
+        }
+
+        async function runRecon(mode) {
+            const target = document.getElementById('recon-target').value;
+            if (!target) return alert("Enter Target IP");
+            log(`Starting ${mode} scan on ${target}...`);
+            const res = await api('/api/action/recon', 'POST', { target, mode });
             if (res.message) log(res.message);
         }
 

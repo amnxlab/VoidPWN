@@ -475,6 +475,98 @@ def action_restore_hdmi():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/action/handshake', methods=['POST'])
+def action_handshake():
+    """Capture WPA Handshake"""
+    if not CURRENT_TARGET:
+        return jsonify({'status': 'error', 'message': 'No target selected!'}), 400
+
+    bssid = CURRENT_TARGET.get('bssid')
+    channel = CURRENT_TARGET.get('channel')
+    ssid = CURRENT_TARGET.get('essid', 'Unknown')
+    
+    try:
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --handshake {bssid} {channel} \"{ssid}\""
+        subprocess.Popen(cmd, shell=True)
+        
+        reporter.add_report(
+            "HANDSHAKE", 
+            ssid, 
+            "Started", 
+            f"Capturing Handshake on Ch {channel}"
+        )
+        return jsonify({'status': 'success', 'message': f'Capturing handshake for {ssid}...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/action/crack', methods=['POST'])
+def action_crack():
+    """Crack latest handshake"""
+    # Find latest .cap file
+    try:
+        files = glob.glob(os.path.join(CAPTURES_DIR, '*.cap'))
+        if not files:
+            return jsonify({'status': 'error', 'message': 'No capture files found!'}), 400
+            
+        latest_cap = max(files, key=os.path.getctime)
+        filename = os.path.basename(latest_cap)
+        
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --crack \"{latest_cap}\""
+        # Running in background, but ideally needs output streaming
+        subprocess.Popen(cmd, shell=True)
+        
+        reporter.add_report(
+            "CRACK", 
+            filename, 
+            "Started", 
+            "Wordlist attack initiated"
+        )
+        return jsonify({'status': 'success', 'message': f'Cracking {filename}...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/action/wifite')
+def action_wifite():
+    """Launch automated Wifite attack"""
+    try:
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --auto-attack"
+        subprocess.Popen(cmd, shell=True)
+        
+        reporter.add_report(
+            "WIFITE", 
+            "ALL", 
+            "Started", 
+            "Automated Wifite Attack"
+        )
+        return jsonify({'status': 'success', 'message': 'Launched Wifite Auto-Attack'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/action/recon', methods=['POST'])
+def action_recon():
+    """Run Nmap Recon"""
+    data = request.get_json()
+    target = data.get('target')
+    mode = data.get('mode', 'quick') # quick, full, stealth, vuln
+    
+    if not target:
+        return jsonify({'error': 'Target required'}), 400
+        
+    try:
+        flag = f"--{mode}"
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/recon.sh {flag} \"{target}\""
+        subprocess.Popen(cmd, shell=True)
+        
+        reporter.add_report(
+            "RECON", 
+            target, 
+            "Started", 
+            f"Mode: {mode.upper()}"
+        )
+        return jsonify({'status': 'success', 'message': f'Starting {mode} scan on {target}...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     print("Starting VoidPWN Dashboard Server...")
     print("Access dashboard at: http://<PI_IP>:5000")
