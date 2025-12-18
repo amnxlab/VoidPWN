@@ -174,23 +174,58 @@ async function scanWifi() {
         return;
     }
 
-    list.innerHTML = '';
-    res.networks.forEach(net => {
-        const row = document.createElement('div');
-        row.className = 'device-card';
-        row.innerHTML = `
-            <div style="display:flex; justify-content:space-between">
-                <span>${net.ssid}</span>
-                <span style="color:var(--primary)">${net.signal}%</span>
+    if (res.networks) {
+        state.networks = res.networks;
+        list.innerHTML = '';
+        res.networks.forEach(net => {
+            const row = document.createElement('div');
+            row.className = 'device-card';
+
+            // Security check
+            const isOpen = net.security === '--' || net.security.toLowerCase().includes('none') || net.security === '';
+
+            row.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center mb:5px">
+                <span style="font-weight:bold">${net.ssid}</span>
+                <span style="color:var(--primary); font-size:0.8rem">${net.signal}%</span>
             </div>
-            <div style="font-size:0.75rem; color:var(--text-dim)">${net.security}</div>
+            <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:8px">${net.security}</div>
+            <div class="card-actions">
+                <button class="btn-mini" onclick="event.stopPropagation(); quickConnect('${net.ssid}', true)">CONNECT</button>
+                ${!isOpen ? `<button class="btn-mini" style="border-color:var(--secondary)" onclick="event.stopPropagation(); quickConnect('${net.ssid}', false)">BYPASS</button>` : ''}
+            </div>
         `;
-        row.onclick = () => {
-            state.selectedNetwork = net;
-            selectTargetNetwork(net);
-        };
-        list.appendChild(row);
-    });
+            row.onclick = () => {
+                state.selectedNetwork = net;
+                selectTargetNetwork(net);
+            };
+            list.appendChild(row);
+        });
+    }
+}
+
+/**
+ * Quick connect logic
+ * @param {string} ssid 
+ * @param {boolean} askPass 
+ */
+async function quickConnect(ssid, askPass) {
+    if (askPass) {
+        // Just focus the input and show keyboard automatically
+        const input = document.getElementById('wifi-password-input');
+        input.value = '';
+        input.placeholder = `Pass for ${ssid}...`;
+        showKeyboard('wifi-password-input');
+        // Select the network in state so the global CONNECT button works
+        const net = state.networks?.find(n => n.ssid === ssid);
+        if (net) selectTargetNetwork(net);
+    } else {
+        // Bypass - attempt connection without password
+        log(`Bypassing password for ${ssid}...`);
+        const res = await api('/api/wifi/connect', 'POST', { ssid, password: '' });
+        if (res.status === 'success') log(res.message, 'success');
+        else log(res.error, 'error');
+    }
 }
 
 async function selectTargetNetwork(net) {
