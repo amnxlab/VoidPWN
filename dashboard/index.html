@@ -227,10 +227,9 @@
 
             </div>
 
-            <!-- Right Sidebar: Global Info -->
+            <!-- Right Sidebar: Device Inventory -->
             <div class="sidebar">
-                <!-- Device Inventory -->
-                <div class="panel" style="flex: 1; display:flex; flex-direction:column">
+                <div class="panel" style="flex: 1; display:flex; flex-direction:column; margin-bottom: 0;">
                     <div class="panel-header">
                         <h2>Inventory</h2>
                         <button class="btn" style="padding:4px 8px; font-size:0.6rem"
@@ -239,23 +238,31 @@
                     <div id="inventory-list" class="device-list" style="flex:1; overflow-y:auto">
                         <!-- Devices from JS -->
                     </div>
-                    <div style="margin-top:15px; border-top: 1px solid var(--border); padding-top:15px;">
+                    <div id="active-target-display"
+                        style="margin-top:15px; border-top: 1px solid var(--border); padding-top:15px; display:none">
                         <div class="stat-label" style="font-size:0.7rem">ACTIVE TARGET:</div>
                         <div class="active-target-badge"
                             style="font-family:var(--font-mono); color:var(--secondary); font-size:0.8rem">NONE SELECTED
                         </div>
                     </div>
                 </div>
-
-                <!-- Real-time HUD Log -->
-                <div class="panel" style="height: 250px; display:flex; flex-direction:column">
-                    <h2>Live HUD</h2>
-                    <div id="attack-log" class="log-container">
-                        <!-- Logs here -->
-                    </div>
-                </div>
             </div>
         </main>
+
+        <!-- Real-time HUD Log (Bottom) -->
+        <footer class="hud-footer">
+            <div class="panel" style="height: 100%; margin: 0; display:flex; flex-direction:column">
+                <div class="panel-header" style="margin-bottom: 5px; padding: 0 10px;">
+                    <h2 style="font-size: 0.8rem;"><span class="material-icons" style="font-size: 1rem;">terminal</span>
+                        LIVE HUD</h2>
+                    <div style="font-size: 0.6rem; color: var(--text-dim)">Streaming CLI Output...</div>
+                </div>
+                <div id="attack-log" class="log-container"
+                    style="flex:1; border-top: 1px solid var(--border); padding: 5px 10px;">
+                    <!-- Logs here -->
+                </div>
+            </div>
+        </footer>
     </div>
 
     <!-- Virtual Keyboard -->

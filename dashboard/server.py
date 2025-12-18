@@ -17,9 +17,42 @@ try:
 except ImportError:
     psutil = None
 import time
-import json
-from datetime import datetime
 import uuid
+import collections
+
+# --- Circular Log for Live HUD ---
+LIVE_LOGS = collections.deque(maxlen=100)
+
+def add_live_log(msg, type="info"):
+    timestamp = datetime.now().strftime('%H:%M:%S')
+    LIVE_LOGS.append({'time': timestamp, 'msg': msg, 'type': type})
+
+def run_proc_and_capture(cmd_str):
+    """Run a process in the background and capture its output to LIVE_LOGS"""
+    try:
+        proc = subprocess.Popen(
+            cmd_str,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            universal_newlines=True
+        )
+        
+        def capture():
+            for line in iter(proc.stdout.readline, ""):
+                if line:
+                    add_live_log(line.strip())
+            proc.stdout.close()
+            proc.wait()
+            
+        import threading
+        threading.Thread(target=capture, daemon=True).start()
+        return proc
+    except Exception as e:
+        add_live_log(f"Error starting process: {str(e)}", "error")
+        return None
 
 # --- Reporting System ---
 class ReportManager:
@@ -348,7 +381,7 @@ def scan_devices():
         if not target_subnet:
             if interface:
                 # Get IP of interface
-                ip_cmd = f"ip -4 addr show {interface} | grep -oP '(?<=inet\s)\d+(\.\d+){{3}}'"
+                ip_cmd = r"ip -4 addr show " + interface + r" | grep -oP '(?<=inet\s)\d+(\.\d+){3}'"
                 ip_res = subprocess.run(ip_cmd, shell=True, capture_output=True, text=True)
                 local_ip = ip_res.stdout.strip()
                 if not local_ip:
@@ -483,6 +516,11 @@ def select_target():
     data = request.get_json()
     CURRENT_TARGET = data
     return jsonify({'status': 'success', 'target': CURRENT_TARGET})
+
+@app.route('/api/logs/live')
+def get_live_logs():
+    """Get the latest logs for the HUD"""
+    return jsonify({'logs': list(LIVE_LOGS)})
 
 @app.route('/api/target/current')
 def get_target():
@@ -850,8 +888,9 @@ def action_pixie():
 def run_scenario(name, cmd):
     """Helper to run a scenario and log it"""
     try:
-        subprocess.Popen(cmd, shell=True)
+        run_proc_and_capture(cmd)
         reporter.add_report("SCENARIO", name, "Started", f"Launched scenario: {name}")
+        add_live_log(f"SCENARIO STARTED: {name}", "success")
         return jsonify({'status': 'success', 'message': f'Scenario {name} started in background'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500

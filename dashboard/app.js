@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await checkSelectedDevice();
     loadReports();
     refreshSystemInfo();
+    setInterval(pollLiveLogs, 2000);
 });
 
 async function checkSelectedDevice() {
@@ -108,9 +109,32 @@ async function scanDevices(mode = 'quick') {
 
 function renderDeviceList() {
     const container = document.getElementById('inventory-list');
+    const targetDisplay = document.getElementById('active-target-display');
     if (!container) return;
 
     container.innerHTML = '';
+
+    // 1. Show Network Target if any
+    if (state.selectedNetwork) {
+        targetDisplay.style.display = 'block';
+        const badge = targetDisplay.querySelector('.active-target-badge');
+        badge.textContent = state.selectedNetwork.cidr || state.selectedNetwork.ssid || state.selectedNetwork.bssid;
+
+        // Add a special card for the subnet in the inventory too
+        const subnetCard = document.createElement('div');
+        subnetCard.className = 'device-card selected';
+        subnetCard.style.borderColor = 'var(--secondary)';
+        subnetCard.innerHTML = `
+            <div style="font-size:0.6rem; color:var(--secondary); text-transform:uppercase">Active Network</div>
+            <div class="ip">${state.selectedNetwork.cidr || state.selectedNetwork.ssid}</div>
+            <div class="host">Broadcasting / Subnet</div>
+        `;
+        container.appendChild(subnetCard);
+    } else {
+        targetDisplay.style.display = 'none';
+    }
+
+    // 2. Show Devices
     state.devices.forEach(device => {
         const card = document.createElement('div');
         card.className = `device-card ${state.selectedDevice?.id === device.id ? 'selected' : ''}`;
@@ -280,10 +304,30 @@ function log(msg, type = '') {
     const time = new Date().toLocaleTimeString([], { hour12: false });
     const entry = document.createElement('div');
     entry.className = `log-entry ${type}`;
-    entry.innerHTML = `<span class="time">[${time}]</span> ${msg}`;
+    entry.innerHTML = `<span class="time">[${time}]</span> <span class="msg">${msg}</span>`;
 
     container.appendChild(entry);
     container.scrollTop = container.scrollHeight;
+}
+
+async function pollLiveLogs() {
+    const res = await api('/api/logs/live');
+    if (res.logs && res.logs.length > 0) {
+        const container = document.getElementById('attack-log');
+        const currentCount = container.querySelectorAll('.log-entry').length;
+
+        // If we have new logs, append them
+        if (res.logs.length > currentCount || (res.logs.length > 0 && currentCount === 0)) {
+            container.innerHTML = '';
+            res.logs.forEach(l => {
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${l.type}`;
+                entry.innerHTML = `<span class="time">[${l.time}]</span> <span class="msg">${l.msg}</span>`;
+                container.appendChild(entry);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+    }
 }
 
 async function loadReports() {
