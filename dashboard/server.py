@@ -15,6 +15,52 @@ import re
 import time
 import json
 from datetime import datetime
+import uuid
+
+# --- Reporting System ---
+class ReportManager:
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.reports = self._load()
+
+    def _load(self):
+        if os.path.exists(self.filepath):
+            try:
+                with open(self.filepath, 'r') as f:
+                    return json.load(f)
+            except:
+                return []
+        return []
+
+    def _save(self):
+        try:
+            with open(self.filepath, 'w') as f:
+                json.dump(self.reports, f, indent=2)
+        except Exception as e:
+            print(f"Failed to save report: {e}")
+
+    def add_report(self, action_type, target, status="Running", details=""):
+        report = {
+            "id": str(uuid.uuid4()),
+            "timestamp": datetime.now().isoformat(),
+            "type": action_type,
+            "target": target,
+            "status": status,
+            "details": details
+        }
+        self.reports.insert(0, report) # Prepend
+        self._save()
+        return report
+
+    def update_status(self, report_id, new_status):
+        for r in self.reports:
+            if r['id'] == report_id:
+                r['status'] = new_status
+                self._save()
+                break
+
+    def get_all(self):
+        return self.reports
 
 app = Flask(__name__, static_folder='.')
 
@@ -31,9 +77,17 @@ RECON_DIR = os.path.join(VOIDPWN_DIR, 'output', 'recon')
 os.makedirs(CAPTURES_DIR, exist_ok=True)
 os.makedirs(RECON_DIR, exist_ok=True)
 
+# Initialize Reporter
+REPORTS_FILE = os.path.join(VOIDPWN_DIR, 'output', 'reports.json')
+reporter = ReportManager(REPORTS_FILE)
+
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
+
+@app.route('/api/reports')
+def get_reports():
+    return jsonify({'reports': reporter.get_all()})
 
 @app.route('/api/system')
 def get_system_info():
@@ -329,6 +383,7 @@ def action_monitor_on():
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --monitor-on"
         subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        reporter.add_report("SYSTEM", "Interface", "Success", "Enabled Monitor Mode")
         return jsonify({'status': 'success', 'message': 'Monitor mode enabling...'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -339,6 +394,7 @@ def action_monitor_off():
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --monitor-off"
         subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        reporter.add_report("SYSTEM", "Interface", "Success", "Disabled Monitor Mode")
         return jsonify({'status': 'success', 'message': 'Monitor mode disabling...'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -355,6 +411,14 @@ def action_evil_twin():
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --evil-twin \"{ssid}\" {channel}"
         subprocess.Popen(cmd, shell=True)
+        
+        reporter.add_report(
+            "EVIL_TWIN", 
+            ssid, 
+            "Started", 
+            f"Launched Evil Twin on Ch {channel}"
+        )
+        
         return jsonify({'status': 'success', 'message': f'Starting Evil Twin on {ssid}...'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -366,10 +430,19 @@ def action_display_deauth():
         return jsonify({'status': 'error', 'message': 'No target selected!'}), 400
         
     bssid = CURRENT_TARGET.get('bssid')
+    ssid = CURRENT_TARGET.get('essid', 'Unknown')
     
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --deauth {bssid} 0"
         subprocess.Popen(cmd, shell=True)
+        
+        reporter.add_report(
+            "DEAUTH", 
+            ssid, 
+            "Running", 
+            f"Deauthing BSSID {bssid}"
+        )
+        
         return jsonify({'status': 'success', 'message': f'Deauthing {bssid}...'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
