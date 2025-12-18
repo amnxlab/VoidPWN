@@ -110,14 +110,14 @@ log_success "Display rotation configured"
 # Step 4: Touch Calibration
 log_info "Step 4/5: Configuring touch input calibration..."
 
-# Create a script to detect and calibrate touch device
-# Corrected matrix for portrait mode (right rotation): 0 1 0 -1 0 1 0 0 1
-# This maps: touch-x to screen-y, touch-y to inverted screen-x
+# Touch calibration for portrait mode with USB on right
+# Observed: Right→Down, Left→Up, Up→Left, Down→Right (90° CCW rotation)
+# Correction: Apply 90° CW rotation matrix: -1 0 1 0 1 0 0 0 1
 cat > "$USER_HOME/.config/autostart/calibrate-touch.desktop" <<'EOF'
 [Desktop Entry]
 Type=Application
 Name=Calibrate Touch
-Exec=/bin/bash -c "sleep 3 && TOUCH_ID=$(xinput list | grep -i 'touch\\|ADS7846' | grep -o 'id=[0-9]*' | grep -o '[0-9]*' | head -1) && [ -n \"$TOUCH_ID\" ] && xinput set-prop $TOUCH_ID 'Coordinate Transformation Matrix' 0 1 0 -1 0 1 0 0 1"
+Exec=/bin/bash -c "sleep 3 && TOUCH_ID=$(xinput list | grep -i 'touch\\|ADS7846' | grep -o 'id=[0-9]*' | grep -o '[0-9]*' | head -1) && [ -n \"$TOUCH_ID\" ] && xinput set-prop $TOUCH_ID 'Coordinate Transformation Matrix' -1 0 1 0 1 0 0 0 1"
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
