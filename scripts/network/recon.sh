@@ -139,6 +139,12 @@ web_enum() {
         log_error "Usage: $0 --web <TARGET> [WORDLIST]"
         exit 1
     fi
+
+    # Basic check for CIDR - Gobuster wants a host
+    if [[ "$target" == *"/"* ]]; then
+        log_error "Target $target appears to be a network range. Web enumeration requires a single host IP or URL."
+        exit 1
+    fi
     
     local output="$OUTPUT_DIR/web_enum_${TIMESTAMP}.txt"
     
@@ -158,6 +164,11 @@ smb_enum() {
     
     if [[ -z "$target" ]]; then
         log_error "Usage: $0 --smb <TARGET>"
+        exit 1
+    fi
+
+    if [[ "$target" == *"/"* ]]; then
+        log_error "Target $target appears to be a network range. SMB enumeration requires a single host IP."
         exit 1
     fi
     
@@ -185,7 +196,18 @@ smb_enum() {
 
 # ARP scan
 arp_scan_network() {
-    local interface="${1:-eth0}"
+    local interface="$1"
+    
+    if [[ -z "$interface" ]] || [[ "$interface" == *"/"* ]] || [[ "$interface" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        log_warning "Invalid or missing interface '$interface'. Detecting default..."
+        interface=$(ip route | grep default | awk '{print $5}' | head -1)
+        if [[ -z "$interface" ]]; then
+            interface="eth0"
+            log_warning "Could not detect default interface, falling back to $interface"
+        else
+            log_info "Detected interface: $interface"
+        fi
+    fi
     
     log_info "ARP scan on interface $interface"
     echo ""

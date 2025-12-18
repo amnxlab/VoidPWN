@@ -233,8 +233,8 @@ async function loadInterfaces() {
 async function selectInterface(name, ip) {
     if (ip === "N/A" || !ip) return log("Interface has no IP!", "error");
     const subnet = ip.split('.').slice(0, 3).join('.') + '.0/24';
-    log(`SETTING TARGET SUBNET: ${subnet}...`, 'info');
-    const res = await api('/api/target/subnet', 'POST', { subnet });
+    log(`SETTING TARGET SUBNET: ${subnet} (${name})...`, 'info');
+    const res = await api('/api/target/subnet', 'POST', { subnet, interface: name });
     if (res.status === 'success') {
         state.selectedNetwork = res.target;
         state.selectedDevice = null; // Clear selected device when switching subnets
@@ -271,12 +271,29 @@ async function runAction(action, data = {}) {
     const wifiActions = ['deauth', 'evil_twin', 'handshake', 'pmkid', 'pixie', 'auth', 'wifite'];
     let target = wifiActions.includes(action) ? wifiTarget : ipTarget;
 
-    // Fallback to subnet CIDR for network-wide actions (recon)
-    if (!target && action === 'recon' && state.selectedNetwork) {
-        target = state.selectedNetwork.cidr;
+    // Special handling for ARP
+    if (action === 'recon' && data.mode === 'arp') {
+        if (state.selectedNetwork && state.selectedNetwork.interface) {
+            target = state.selectedNetwork.interface;
+        } else {
+            return alert("Select an active Interface first!");
+        }
     }
 
-    if (action === 'recon' && !target) return alert("Select a Device or Subnet Target!");
+    // Fallback to subnet CIDR for network-wide actions (nmap discovery)
+    if (!target && action === 'recon' && state.selectedNetwork) {
+        if (['quick', 'full', 'stealth', 'vuln', 'comprehensive', 'discover'].includes(data.mode)) {
+            target = state.selectedNetwork.cidr;
+        }
+    }
+
+    if (action === 'recon' && !target) {
+        if (['web', 'smb', 'dns'].includes(data.mode)) {
+            return alert("Host-specific recon requires a specific Device Target (IP)!");
+        }
+        return alert("Select a Device or Subnet Target!");
+    }
+
     if (wifiActions.includes(action) && !target && !['pmkid', 'wifite', 'beacon', 'auth'].includes(action)) {
         return alert("Select a WiFi Network Target!");
     }

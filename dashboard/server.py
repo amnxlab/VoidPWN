@@ -473,7 +473,7 @@ def scan_devices():
         cmd = " ".join(cmd_list)
         run_proc_and_capture(cmd, log_file=log_file)
         
-        reporter.add_report("SCAN", target_subnet, "Started", f"Network discovery ({mode})", log_file=log_file)
+        reporter.add_report(f"SCAN ({mode.upper()})", target_subnet, "Started", f"Network discovery ({mode})", log_file=log_file)
         add_live_log(f"NETWORK DISCOVERY STARTED: {target_subnet}", "info")
         
         return jsonify({'status': 'success', 'message': f'Discovery started on {target_subnet}'})
@@ -559,8 +559,14 @@ def select_subnet_target():
     global CURRENT_TARGET
     data = request.get_json()
     subnet = data.get('subnet')
+    interface = data.get('interface')
     if subnet:
-        CURRENT_TARGET = {'type': 'subnet', 'cidr': subnet, 'ssid': subnet}
+        CURRENT_TARGET = {
+            'type': 'subnet', 
+            'cidr': subnet, 
+            'ssid': subnet, 
+            'interface': interface
+        }
         return jsonify({'status': 'success', 'target': CURRENT_TARGET})
     return jsonify({'error': 'Subnet required'}), 400
 
@@ -589,43 +595,6 @@ def view_full_log(filename):
             return jsonify({'content': f.read()})
     return jsonify({'error': 'Log file not found'}), 404
 
-@app.route('/api/ai/analyze', methods=['POST'])
-def ai_analyze_report():
-    """Generate an AI summary of a mission log using a free provider"""
-    data = request.get_json()
-    log_content = data.get('content', '')
-    if not log_content:
-        return jsonify({'summary': 'No intelligence data found in mission logs.'})
-    
-    # Truncate log to keep it within reasonable limits for a free API
-    max_chars = 3500
-    if len(log_content) > max_chars:
-        # Take beginning and end for context
-        log_content = log_content[:2000] + "\n\n[...SYSTEM OMITTED MID-LOG DATA...]\n\n" + log_content[-1500:]
-
-    prompt = (
-        "Role: VoidAI Cyber-Tactical Assistant. Task: Analyze raw mission logs. "
-        "Format: HTML-friendly Markdown. Sections: MISSION SUMMARY, ASSETS DISCOVERED, THREAT VECTOR ANALYSIS, RECOMMENDED EXPLOIT/RECON STEPS. "
-        "Tone: Professional, high-tech, slightly futuristic/hacker aesthetic. "
-        "LOG DATA:\n" + log_content
-    )
-    
-    try:
-        # Using Pollinations.ai free text endpoint (Open-Source access)
-        # It accepts any text as path and returns AI response
-        encoded_prompt = urllib.parse.quote(prompt)
-        url = f"https://text.pollinations.ai/{encoded_prompt}"
-        
-        # We can also add model hints if supported, e.g. ?model=openai
-        with urllib.request.urlopen(url, timeout=45) as response:
-            summary = response.read().decode('utf-8')
-            return jsonify({'summary': summary})
-    except Exception as e:
-        print(f"VoidAI Error: {e}")
-        return jsonify({
-            'error': str(e), 
-            'summary': "⚠️ **TACTICAL NETWORK ERROR**: Could not reach VoidNet Intelligence Hub. Ensure internet connectivity is active for AI processing."
-        }), 500
 
 @app.route('/api/target/current')
 def get_target():
@@ -713,7 +682,7 @@ def action_monitor_on():
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --monitor-on"
         subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        reporter.add_report("SYSTEM", "Interface", "Success", "Enabled Monitor Mode")
+        reporter.add_report("WIFI (MONITOR-ON)", "Interface", "Success", "Enabled Monitor Mode")
         return jsonify({'status': 'success', 'message': 'Monitor mode enabling...'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -724,7 +693,7 @@ def action_monitor_off():
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --monitor-off"
         subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        reporter.add_report("SYSTEM", "Interface", "Success", "Disabled Monitor Mode")
+        reporter.add_report("WIFI (MONITOR-OFF)", "Interface", "Success", "Disabled Monitor Mode")
         return jsonify({'status': 'success', 'message': 'Monitor mode disabling...'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -743,7 +712,7 @@ def action_evil_twin():
         subprocess.Popen(cmd, shell=True)
         
         reporter.add_report(
-            "EVIL_TWIN", 
+            "WIFI (EVIL TWIN)", 
             ssid, 
             "Started", 
             f"Launched Evil Twin on Ch {channel}"
@@ -767,7 +736,7 @@ def action_display_deauth():
         subprocess.Popen(cmd, shell=True)
         
         reporter.add_report(
-            "DEAUTH", 
+            "WIFI (DEAUTH)", 
             ssid, 
             "Running", 
             f"Deauthing BSSID {bssid}"
@@ -829,7 +798,7 @@ def action_handshake():
         subprocess.Popen(cmd, shell=True)
         
         reporter.add_report(
-            "HANDSHAKE", 
+            "WIFI (HANDSHAKE)", 
             ssid, 
             "Started", 
             f"Capturing Handshake on Ch {channel}"
@@ -855,7 +824,7 @@ def action_crack():
         run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
-            "CRACK", 
+            "WIFI (CRACK)", 
             filename, 
             "Started", 
             "Wordlist attack initiated",
@@ -875,7 +844,7 @@ def action_wifite():
         run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
-            "WIFITE", 
+            "WIFI (AUTO-ATTACK)", 
             "ALL", 
             "Started", 
             "Automated Wifite Attack",
@@ -903,7 +872,7 @@ def action_recon():
         run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
-            "RECON", 
+            f"RECON ({mode.upper()})", 
             target, 
             "Started", 
             f"Mode: {mode.upper()}",
@@ -925,7 +894,7 @@ def action_pmkid():
         run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
-            "PMKID", 
+            "WIFI (PMKID)", 
             "ALL", 
             "Started", 
             f"Capture running for {duration}s",
@@ -947,7 +916,7 @@ def action_beacon():
         run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
-            "BEACON_FLOOD", 
+            "WIFI (BEACON)", 
             "CHAOS", 
             "Running", 
             "MDK4 Beacon Flooding active",
@@ -969,7 +938,7 @@ def action_auth_flood():
         run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
-            "AUTH_FLOOD", 
+            "WIFI (AUTH)", 
             target or "ALL", 
             "Running", 
             "MDK4 Authentication Flooding active",
@@ -994,7 +963,7 @@ def action_pixie():
         run_proc_and_capture(cmd, log_file=log_file)
         
         reporter.add_report(
-            "PIXIE_DUST", 
+            "WIFI (PIXIE)", 
             target, 
             "Started", 
             "WPS Pixie-Dust attack initiated",
@@ -1010,7 +979,7 @@ def run_scenario(name, cmd):
     log_file = gen_log_name(name)
     try:
         run_proc_and_capture(cmd, log_file=log_file)
-        reporter.add_report("SCENARIO", name, "Started", f"Launched scenario: {name}", log_file=log_file)
+        reporter.add_report(f"SCENARIO ({name.upper()})", name, "Started", f"Launched scenario: {name}", log_file=log_file)
         add_live_log(f"SCENARIO STARTED: {name}", "success")
         return jsonify({'status': 'success', 'message': f'Scenario {name} started in background'})
     except Exception as e:
@@ -1061,7 +1030,7 @@ def action_throttle():
     try:
         cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_throttle.sh {target} {speed}"
         run_proc_and_capture(cmd, log_file=log_file)
-        reporter.add_report("THROTTLE", target, "Running", f"Limiting to {speed}", log_file=log_file)
+        reporter.add_report("NETWORK (THROTTLE)", target, "Running", f"Limiting to {speed}", log_file=log_file)
         return jsonify({'status': 'success', 'message': f'Throttling {target} to {speed}'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
