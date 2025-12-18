@@ -16,10 +16,34 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 # Configuration
-INTERFACE="wlan1"
-MONITOR_INTERFACE="${INTERFACE}mon"
 OUTPUT_DIR="$HOME/VoidPWN/output/captures"
 WORDLIST="/usr/share/wordlists/rockyou.txt"
+
+# Auto-detect Interface
+detect_interface() {
+    # Check for wlan1 (commonly external adapter)
+    if iwconfig 2>/dev/null | grep -q "^wlan1"; then
+        echo "wlan1"
+    # Check for wlan0 (internal)
+    elif iwconfig 2>/dev/null | grep -q "^wlan0"; then
+        echo "wlan0"
+    # Fallback: Find anything starting with wlan or wlp
+    else
+        iwconfig 2>&1 | grep "IEEE 802.11" | awk '{print $1}' | head -n 1
+    fi
+}
+
+INTERFACE=$(detect_interface)
+if [[ -z "$INTERFACE" ]]; then
+    echo -e "${RED}[!] No wireless interface detected!${NC}"
+    exit 1
+fi
+
+# Set monitor interface name (airmon-ng usually appends 'mon' or changes it)
+MONITOR_INTERFACE="${INTERFACE}mon"
+if [[ "$INTERFACE" == *"mon"* ]]; then
+    MONITOR_INTERFACE="$INTERFACE"
+fi
 
 # Create output directory
 mkdir -p "$OUTPUT_DIR"
@@ -67,14 +91,39 @@ enable_monitor_mode() {
         exit 1
     fi
     
+    # Check if already in monitor mode
+    if iwconfig "$INTERFACE" 2>/dev/null | grep -q "Mode:Monitor"; then
+        log_success "Interface $INTERFACE is already in monitor mode"
+        MONITOR_INTERFACE="$INTERFACE"
+        return
+    fi
+
     # Enable monitor mode
     airmon-ng start "$INTERFACE" > /dev/null 2>&1
     
-    if iwconfig 2>/dev/null | grep -q "$MONITOR_INTERFACE"; then
+    # Update monitor interface name (sometimes it stays wlanX, sometimes wlanXmon)
+    # We check for the one that has Mode:Monitor
+    if iwconfig 2>/dev/null | grep -q "${INTERFACE}mon"; then
+        MONITOR_INTERFACE="${INTERFACE}mon"
+    elif iwconfig "$INTERFACE" 2>/dev/null | grep -q "Mode:Monitor"; then
+        MONITOR_INTERFACE="$INTERFACE"
+    fi
+    
+    if iwconfig "$MONITOR_INTERFACE" 2>/dev/null | grep -q "Mode:Monitor"; then
         log_success "Monitor mode enabled on $MONITOR_INTERFACE"
     else
         log_error "Failed to enable monitor mode"
-        exit 1
+        # Try brute force method
+        log_info "Attempting alternative method..."
+        ifconfig "$INTERFACE" down
+        iwconfig "$INTERFACE" mode monitor
+        ifconfig "$INTERFACE" up
+        if iwconfig "$INTERFACE" 2>/dev/null | grep -q "Mode:Monitor"; then
+            MONITOR_INTERFACE="$INTERFACE"
+            log_success "Monitor mode enabled on $MONITOR_INTERFACE (Manual method)"
+        else
+            exit 1
+        fi
     fi
 }
 
@@ -145,7 +194,7 @@ auto_attack() {
            --dict "$WORDLIST" \
            --wpa \
            --no-wps \
-           --interface "$MONITOR_INTERFACE"
+           -i "$MONITOR_INTERFACE"
 }
 
 # Deauth attack
