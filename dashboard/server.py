@@ -9,9 +9,13 @@ from flask import Flask, jsonify, send_from_directory, request
 import subprocess
 import os
 import glob
-import psutil
 import csv
 import re
+
+try:
+    import psutil
+except ImportError:
+    psutil = None
 import time
 import json
 from datetime import datetime
@@ -203,18 +207,25 @@ def get_system_info():
         iwconfig_result = subprocess.run(['iwconfig'], capture_output=True, text=True, stderr=subprocess.STDOUT)
         adapter = 'DETECTED' if 'wlan1' in iwconfig_result.stdout else 'NOT FOUND'
         
-        # Get CPU usage
-        cpu_percent = psutil.cpu_percent(interval=1)
-        
-        # Get memory info
-        mem = psutil.virtual_memory()
-        memory = f"{mem.used // (1024**2)} MB / {mem.total // (1024**2)} MB"
-        mem_percent = mem.percent
-        
-        # Get disk info
-        disk = psutil.disk_usage('/')
-        disk_info = f"{disk.used // (1024**3)} GB / {disk.total // (1024**3)} GB"
-        disk_percent = disk.percent
+        if psutil:
+            # Get CPU usage
+            cpu_percent = psutil.cpu_percent(interval=1)
+            
+            # Get memory info
+            mem = psutil.virtual_memory()
+            memory = f"{mem.used // (1024**2)} MB / {mem.total // (1024**2)} MB"
+            mem_percent = mem.percent
+            
+            # Get disk info
+            disk = psutil.disk_usage('/')
+            disk_info = f"{disk.used // (1024**3)} GB / {disk.total // (1024**3)} GB"
+            disk_percent = disk.percent
+        else:
+            cpu_percent = 0
+            memory = "psutil missing"
+            mem_percent = 0
+            disk_info = "psutil missing"
+            disk_percent = 0
         
         return jsonify({
             'ip': ip,
@@ -380,8 +391,6 @@ def scan_devices():
         return jsonify({'status': 'success', 'count': found_count, 'subnet': target_subnet})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/devices/update', methods=['POST'])
 def update_device():
@@ -421,7 +430,9 @@ SCAN_RUNNING = False
 def list_interfaces():
     """List UP network interfaces and their IPs"""
     try:
-        import psutil
+        if not psutil:
+            return jsonify({'error': 'psutil dependency missing. Please run build_voidpwn.sh again.'}), 500
+            
         interfaces = []
         stats = psutil.net_if_stats()
         addrs = psutil.net_if_addrs()
