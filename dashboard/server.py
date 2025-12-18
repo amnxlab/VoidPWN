@@ -62,6 +62,87 @@ class ReportManager:
     def get_all(self):
         return self.reports
 
+# --- Device Management System ---
+class DeviceManager:
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.devices = self._load()
+        self.selected_device = None
+
+    def _load(self):
+        if os.path.exists(self.filepath):
+            try:
+                with open(self.filepath, 'r') as f:
+                    return json.load(f)
+            except:
+                return []
+        return []
+
+    def _save(self):
+        try:
+            with open(self.filepath, 'w') as f:
+                json.dump(self.devices, f, indent=2)
+        except Exception as e:
+            print(f"Failed to save devices: {e}")
+
+    def add_device(self, ip, mac="", hostname="", device_type="unknown", ports=None, notes="", tags=None):
+        # Check if device already exists
+        for device in self.devices:
+            if device['ip'] == ip:
+                # Update existing
+                device['mac'] = mac or device.get('mac', '')
+                device['hostname'] = hostname or device.get('hostname', '')
+                device['device_type'] = device_type
+                device['ports'] = ports or device.get('ports', [])
+                device['notes'] = notes or device.get('notes', '')
+                device['tags'] = tags if tags is not None else device.get('tags', [])
+                device['last_seen'] = datetime.now().isoformat()
+                self._save()
+                return device
+        
+        # Add new device
+        device = {
+            "id": str(uuid.uuid4()),
+            "ip": ip,
+            "mac": mac,
+            "hostname": hostname,
+            "device_type": device_type,
+            "ports": ports or [],
+            "notes": notes,
+            "tags": tags or [],
+            "first_seen": datetime.now().isoformat(),
+            "last_seen": datetime.now().isoformat()
+        }
+        self.devices.append(device)
+        self._save()
+        return device
+
+    def update_metadata(self, device_id, notes=None, tags=None):
+        for device in self.devices:
+            if device['id'] == device_id or device['ip'] == device_id:
+                if notes is not None: device['notes'] = notes
+                if tags is not None: device['tags'] = tags
+                self._save()
+                return device
+        return None
+
+    def get_all(self):
+        return self.devices
+
+    def clear(self):
+        self.devices = []
+        self._save()
+
+    def select(self, device_id):
+        for device in self.devices:
+            if device['id'] == device_id or device['ip'] == device_id:
+                self.selected_device = device
+                return device
+        return None
+
+    def get_selected(self):
+        return self.selected_device
+
 app = Flask(__name__, static_folder='.')
 
 # Configuration
@@ -80,6 +161,10 @@ os.makedirs(RECON_DIR, exist_ok=True)
 # Initialize Reporter
 REPORTS_FILE = os.path.join(VOIDPWN_DIR, 'output', 'reports.json')
 reporter = ReportManager(REPORTS_FILE)
+
+# Initialize Device Manager
+DEVICES_FILE = os.path.join(VOIDPWN_DIR, 'output', 'devices.json')
+device_manager = DeviceManager(DEVICES_FILE)
 
 @app.route('/')
 def index():
@@ -226,6 +311,97 @@ def get_networks():
     """Get scanned networks (placeholder)"""
     # This would parse airodump-ng output files
     return jsonify({'networks': []})
+
+# --- Device Management Endpoints ---
+@app.route('/api/devices/list')
+def list_devices():
+    return jsonify({'devices': device_manager.get_all()})
+
+@app.route('/api/devices/scan', methods=['POST'])
+def scan_devices():
+    """Discover hosts on the network using nmap"""
+    try:
+        data = request.get_json() or {}
+        mode = data.get('mode', 'quick') # quick or full
+        
+        # Get local network
+        ip_result = subprocess.run(['hostname', '-I'], capture_output=True, text=True)
+        if not ip_result.stdout:
+            return jsonify({'error': 'No local IP found'}), 400
+            
+        local_ip = ip_result.stdout.strip().split()[0]
+        network = '.'.join(local_ip.split('.')[:-1]) + '.0/24'
+        
+        # Perform nmap scan
+        log_msg = f"Starting {mode} network discovery on {network}..."
+        reporter.add_report("SCAN", "Local Network", "Running", log_msg)
+        
+        # Use nmap -sn for fast discovery (ping scan)
+        # or nmap -sV for more info
+        if mode == 'full':
+            cmd = ['sudo', 'nmap', '-sV', '-T4', network]
+        else:
+            cmd = ['sudo', 'nmap', '-sn', network]
+            
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        # Simple parsing of nmap output
+        # Format: Nmap scan report for <hostname> (<ip>)
+        # or Nmap scan report for <ip>
+        found_count = 0
+        current_ip = None
+        current_host = "Unknown"
+        
+        for line in result.stdout.split('\n'):
+            if "Nmap scan report for" in line:
+                match = re.search(r"for ([\d\.]+)", line)
+                if match:
+                    current_ip = match.group(1)
+                    host_match = re.search(r"for (.*) \([\d\.]+\)", line)
+                    current_host = host_match.group(1) if host_match else "Unknown"
+                else:
+                    match = re.search(r"for (.*)", line)
+                    current_ip = match.group(1)
+                    current_host = "Unknown"
+                
+                if current_ip:
+                    device_manager.add_device(current_ip, hostname=current_host)
+                    found_count += 1
+        
+        reporter.add_report("SCAN", "Local Network", "Success", f"Discovered {found_count} devices")
+        return jsonify({'status': 'success', 'count': found_count, 'devices': device_manager.get_all()})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/devices/update', methods=['POST'])
+def update_device():
+    data = request.get_json()
+    device_id = data.get('id')
+    notes = data.get('notes')
+    tags = data.get('tags')
+    
+    device = device_manager.update_metadata(device_id, notes, tags)
+    if device:
+        return jsonify({'status': 'success', 'device': device})
+    return jsonify({'error': 'Device not found'}), 404
+
+@app.route('/api/devices/select', methods=['POST'])
+def select_device():
+    data = request.get_json()
+    device_id = data.get('id')
+    device = device_manager.select(device_id)
+    if device:
+        return jsonify({'status': 'success', 'device': device})
+    return jsonify({'error': 'Device not found'}), 404
+
+@app.route('/api/devices/selected')
+def get_selected_device():
+    return jsonify({'device': device_manager.get_selected()})
+
+@app.route('/api/devices/clear', methods=['POST'])
+def clear_devices():
+    device_manager.clear()
+    return jsonify({'status': 'success'})
 
 # State
 CURRENT_TARGET = None
@@ -575,6 +751,148 @@ def action_recon():
             f"Mode: {mode.upper()}"
         )
         return jsonify({'status': 'success', 'message': f'Starting {mode} scan on {target}...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/action/pmkid', methods=['POST'])
+def action_pmkid():
+    """Capture PMKID (Clientless)"""
+    data = request.get_json() or {}
+    duration = data.get('duration', 300)
+    
+    try:
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --pmkid {duration}"
+        subprocess.Popen(cmd, shell=True)
+        
+        reporter.add_report(
+            "PMKID", 
+            "ALL", 
+            "Started", 
+            f"Capture running for {duration}s"
+        )
+        return jsonify({'status': 'success', 'message': f'PMKID capture started ({duration}s)...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/action/beacon', methods=['POST'])
+def action_beacon():
+    """MDK4 Beacon Flood"""
+    data = request.get_json() or {}
+    ssid_file = data.get('ssid_file', '')
+    
+    try:
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --beacon {ssid_file}"
+        subprocess.Popen(cmd, shell=True)
+        
+        reporter.add_report(
+            "BEACON_FLOOD", 
+            "CHAOS", 
+            "Running", 
+            "MDK4 Beacon Flooding active"
+        )
+        return jsonify({'status': 'success', 'message': 'Beacon flood started...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/action/auth', methods=['POST'])
+def action_auth_flood():
+    """MDK4 Auth Flood"""
+    data = request.get_json() or {}
+    target = data.get('target', '')
+    
+    try:
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --auth {target}"
+        subprocess.Popen(cmd, shell=True)
+        
+        reporter.add_report(
+            "AUTH_FLOOD", 
+            target or "ALL", 
+            "Running", 
+            "MDK4 Authentication Flooding active"
+        )
+        return jsonify({'status': 'success', 'message': f'Auth flood against {target or "ALL"} started...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/action/pixie', methods=['POST'])
+def action_pixie():
+    """WPS Pixie-Dust attack"""
+    data = request.get_json() or {}
+    target = data.get('target', '')
+    
+    if not target:
+        return jsonify({'error': 'Target BSSID required'}), 400
+        
+    try:
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --pixie {target}"
+        subprocess.Popen(cmd, shell=True)
+        
+        reporter.add_report(
+            "PIXIE_DUST", 
+            target, 
+            "Started", 
+            "WPS Pixie-Dust attack initiated"
+        )
+        return jsonify({'status': 'success', 'message': f'Pixie-Dust attack launched on {target}...'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# --- Automated Scenario Endpoints ---
+def run_scenario(name, cmd):
+    """Helper to run a scenario and log it"""
+    try:
+        subprocess.Popen(cmd, shell=True)
+        reporter.add_report("SCENARIO", name, "Started", f"Launched scenario: {name}")
+        return jsonify({'status': 'success', 'message': f'Scenario {name} started in background'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/scenario/wifi_audit', methods=['POST'])
+def scenario_wifi_audit():
+    cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_tools.sh --scan"
+    return run_scenario("WiFi Audit", cmd)
+
+@app.route('/api/scenario/network_sweep', methods=['POST'])
+def scenario_network_sweep():
+    cmd = f"sudo {VOIDPWN_DIR}/scripts/network/recon.sh --discover"
+    return run_scenario("Network Sweep", cmd)
+
+@app.route('/api/scenario/web_hunt', methods=['POST'])
+def scenario_web_hunt():
+    data = request.get_json() or {}
+    target = data.get('target')
+    if not target: return jsonify({'error': 'Target required'}), 400
+    cmd = f"sudo {VOIDPWN_DIR}/scripts/network/recon.sh --web {target}"
+    return run_scenario("Web Hunt", cmd)
+
+@app.route('/api/scenario/stealth_recon', methods=['POST'])
+def scenario_stealth_recon():
+    data = request.get_json() or {}
+    target = data.get('target')
+    if not target: return jsonify({'error': 'Target required'}), 400
+    cmd = f"sudo {VOIDPWN_DIR}/scripts/network/recon.sh --stealth {target}"
+    return run_scenario("Stealth Recon", cmd)
+
+@app.route('/api/scenario/quick_check', methods=['POST'])
+def scenario_quick_check():
+    data = request.get_json() or {}
+    target = data.get('target')
+    if not target: return jsonify({'error': 'Target required'}), 400
+    cmd = f"sudo {VOIDPWN_DIR}/scripts/network/recon.sh --quick {target}"
+    return run_scenario("Quick Check", cmd)
+
+@app.route('/api/action/throttle', methods=['POST'])
+def action_throttle():
+    data = request.get_json() or {}
+    target = data.get('target')
+    speed = data.get('speed', '1mbit')
+    if not target: return jsonify({'error': 'Target required'}), 400
+    
+    try:
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/network/wifi_throttle.sh {target} {speed}"
+        subprocess.Popen(cmd, shell=True)
+        reporter.add_report("THROTTLE", target, "Running", f"Limiting to {speed}")
+        return jsonify({'status': 'success', 'message': f'Throttling {target} to {speed}'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

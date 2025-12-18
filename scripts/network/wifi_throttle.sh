@@ -70,37 +70,46 @@ main() {
     
     # Get Gateway
     GATEWAY=$(ip route | grep default | awk '{print $3}')
-    echo -e "Gateway: $GATEWAY"
     
-    # Select Target
-    echo ""
-    echo -e "${YELLOW}Scanning for devices...${NC}"
-    arp-scan -l -I $INTERFACE | grep -v "Interface" | grep -v "Starting" | grep -v "Ending" | head -n -2
-    
-    echo ""
-    read -p "Enter Target IP: " TARGET_IP
-    
-    if [[ -z "$TARGET_IP" ]]; then
-        echo -e "${RED}Invalid IP${NC}"
-        exit 1
+    # Check for arguments
+    if [[ -n "$1" ]]; then
+        TARGET_IP="$1"
+        SPEED="${2:-1mbit}"
+        echo -e "Target: $TARGET_IP"
+        echo -e "Speed: $SPEED"
+    else
+        echo -e "Gateway: $GATEWAY"
+        
+        # Select Target
+        echo ""
+        echo -e "${YELLOW}Scanning for devices...${NC}"
+        arp-scan -l -I $INTERFACE | grep -v "Interface" | grep -v "Starting" | grep -v "Ending" | head -n -2
+        
+        echo ""
+        read -p "Enter Target IP: " TARGET_IP
+        
+        if [[ -z "$TARGET_IP" ]]; then
+            echo -e "${RED}Invalid IP${NC}"
+            exit 1
+        fi
+        
+        # Select Speed
+        echo ""
+        echo "Select Speed Limit:"
+        echo "  1) 56kbps (Dial-up slow)"
+        echo "  2) 256kbps (Images load slow)"
+        echo "  3) 1mbps (YouTube lags)"
+        echo "  4) Custom"
+        read -p "Selection: " SPEED_OPT
+        
+        case $SPEED_OPT in
+            1) SPEED="56kbit" ;;
+            2) SPEED="256kbit" ;;
+            3) SPEED="1mbit" ;;
+            4) read -p "Enter speed (e.g. 100kbit, 1mbit): " SPEED ;;
+            *) SPEED="1mbit" ;;
+        esac
     fi
-    
-    # Select Speed
-    echo ""
-    echo "Select Speed Limit:"
-    echo "  1) 56kbps (Dial-up slow)"
-    echo "  2) 256kbps (Images load slow)"
-    echo "  3) 1mbps (YouTube lags)"
-    echo "  4) Custom"
-    read -p "Selection: " SPEED_OPT
-    
-    case $SPEED_OPT in
-        1) SPEED="56kbit" ;;
-        2) SPEED="256kbit" ;;
-        3) SPEED="1mbit" ;;
-        4) read -p "Enter speed (e.g. 100kbit, 1mbit): " SPEED ;;
-        *) SPEED="1mbit" ;;
-    esac
 
     echo ""
     echo -e "${GREEN}[+] Limiting $TARGET_IP to $SPEED${NC}"

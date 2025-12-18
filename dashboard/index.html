@@ -3,694 +3,340 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>VoidOS v2.0</title>
-    <style>
-        :root {
-            --bg-color: #050505;
-            --panel-bg: rgba(10, 20, 30, 0.85);
-            --primary: #00f3ff;
-            --secondary: #00ff66;
-            --warning: #ff9d00;
-            --danger: #ff0055;
-            --text-main: #e0e0e0;
-            --text-dim: #888;
-            --border-glow: 0 0 10px rgba(0, 243, 255, 0.2);
-            --font-mono: 'Courier New', monospace;
-            --font-ui: system-ui, -apple-system, sans-serif;
-        }
-
-        * {
-            box-sizing: border-box;
-            user-select: none;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: var(--font-ui);
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- Header --- */
-        header {
-            height: 40px;
-            background: rgba(0, 0, 0, 0.9);
-            border-bottom: 1px solid var(--primary);
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            justify-content: space-between;
-            font-family: var(--font-mono);
-            font-size: 12px;
-            box-shadow: var(--border-glow);
-        }
-
-        .status-badge {
-            padding: 2px 8px;
-            background: rgba(0, 243, 255, 0.1);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            border-radius: 4px;
-        }
-
-        .status-badge.active {
-            background: rgba(0, 255, 102, 0.1);
-            border-color: var(--secondary);
-            color: var(--secondary);
-        }
-
-        .status-badge.alert {
-            background: rgba(255, 0, 85, 0.1);
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-
-        /* --- Main Content --- */
-        main {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            background:
-                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-        }
-
-        .tab-content {
-            display: none;
-            height: 100%;
-            padding: 15px;
-            overflow-y: auto;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* --- Cards & Panels --- */
-        .panel {
-            background: var(--panel-bg);
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 15px;
-            backdrop-filter: blur(5px);
-        }
-
-        h2 {
-            margin: 0 0 15px 0;
-            font-family: var(--font-mono);
-            font-size: 16px;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* --- Buttons --- */
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 10px;
-            background: rgba(0, 243, 255, 0.1);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            font-family: var(--font-mono);
-            text-transform: uppercase;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .btn:active {
-            background: var(--primary);
-            color: #000;
-        }
-
-        .btn.danger {
-            border-color: var(--danger);
-            color: var(--danger);
-            background: rgba(255, 0, 85, 0.1);
-        }
-
-        .btn.danger:active {
-            background: var(--danger);
-            color: #fff;
-        }
-
-        /* --- Footer Tabs --- */
-        footer {
-            height: 60px;
-            background: #000;
-            border-top: 1px solid #333;
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            color: #555;
-            font-family: var(--font-mono);
-            font-size: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-transform: uppercase;
-            cursor: pointer;
-        }
-
-        .tab-btn i {
-            font-size: 18px;
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        /* Using simple text icons for now to avoid fontawesome dep failure */
-
-        .tab-btn.active {
-            color: var(--primary);
-            background: rgba(0, 243, 255, 0.05);
-            box-shadow: inset 0 3px 0 var(--primary);
-        }
-
-        /* --- Specific Views --- */
-
-        /* Scan Results */
-        .scan-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .net-card {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid #444;
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        .net-card.selected {
-            border-color: var(--secondary);
-            background: rgba(0, 255, 102, 0.1);
-        }
-
-        /* Reports Table */
-        .report-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-            font-family: var(--font-mono);
-        }
-
-        .report-table th {
-            text-align: left;
-            color: var(--text-dim);
-            padding-bottom: 5px;
-            border-bottom: 1px solid #333;
-        }
-
-        .report-table td {
-            padding: 8px 0;
-            border-bottom: 1px solid #222;
-        }
-
-        .status-dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        /* Keyboard */
-        .keyboard {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 4px;
-            padding: 10px 0;
-        }
-
-        .key {
-            background: #222;
-            border: 1px solid #444;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .key:active {
-            background: var(--primary);
-            color: #000;
-        }
-
-        input {
-            width: 100%;
-            background: #111;
-            border: 1px solid #333;
-            color: var(--primary);
-            padding: 10px;
-            font-family: var(--font-mono);
-            margin-bottom: 10px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoidPWN Dashboard V3</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
 <body>
 
     <header>
-        <div>VOID<span style="color:var(--primary)">OS</span> v2.0</div>
-        <div id="header-status" class="status-badge">STANDBY</div>
+        <div class="logo">VOID<span>PWN</span> v3.0</div>
+        <div class="system-stats">
+            <div class="stat-item"><span class="stat-label">CPU:</span> <span id="val-cpu" class="stat-value">--%</span>
+            </div>
+            <div class="stat-item"><span class="stat-label">RAM:</span> <span id="val-ram" class="stat-value">--%</span>
+            </div>
+            <div class="stat-item"><span class="stat-label">TEMP:</span> <span id="val-temp"
+                    class="stat-value">--°C</span></div>
+            <div class="stat-item"><span class="stat-label">IP:</span> <span id="val-ip"
+                    class="stat-value">0.0.0.0</span></div>
+        </div>
     </header>
 
-    <main>
-        <!-- TAB 1: CONNECT -->
-        <div id="tab-connect" class="tab-content active">
-            <div class="panel">
-                <h2>WiFi Connection</h2>
-                <div id="wifi-list" style="max-height: 150px; overflow-y: auto; margin-bottom: 10px;">
-                    <!-- Network List populated by JS -->
-                    <div style="padding:10px; text-align:center; color:#666;">Scanning...</div>
+    <div class="layout">
+        <!-- Sidebar Navigation -->
+        <nav>
+            <button class="nav-btn active" data-tab="connect">
+                <span class="material-icons">wifi</span>
+                <span class="nav-label">WIFI CONNECT</span>
+            </button>
+            <button class="nav-btn" data-tab="scan">
+                <span class="material-icons">radar</span>
+                <span class="nav-label">RADAR SCAN</span>
+            </button>
+            <button class="nav-btn" data-tab="attack">
+                <span class="material-icons">gps_fixed</span>
+                <span class="nav-label">WIFI ATTACKS</span>
+            </button>
+            <button class="nav-btn" data-tab="scenarios">
+                <span class="material-icons">auto_awesome</span>
+                <span class="nav-label">AUTOMATED</span>
+            </button>
+            <button class="nav-btn" data-tab="reports">
+                <span class="material-icons">article</span>
+                <span class="nav-label">REPORTS</span>
+            </button>
+            <button class="nav-btn" data-tab="system">
+                <span class="material-icons">settings</span>
+                <span class="nav-label">SYSTEM</span>
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main>
+            <div class="content-left">
+
+                <!-- TAB 1: CONNECT -->
+                <div id="tab-connect" class="tab-content active">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2>WiFi Network Manager</h2>
+                            <button class="btn" id="scan-wifi-btn" onclick="scanWifi()">SCAN</button>
+                        </div>
+                        <div id="wifi-list" class="device-list" style="height: 250px; overflow-y: auto;">
+                            <!-- WiFi list populated by JS -->
+                        </div>
+                        <div style="margin-top:20px;">
+                            <input type="password" id="wifi-password-input" placeholder="WIFI PASSWORD"
+                                onclick="showKeyboard('wifi-password-input')">
+                            <button class="btn" style="width:100%" onclick="connectWifi()">CONNECT</button>
+                        </div>
+                    </div>
                 </div>
-                <input type="text" id="wifi-pass" placeholder="Password" />
-                <div class="keyboard" id="keyboard"></div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-                    <button class="btn" onclick="scanWifi()">Refresh</button>
-                    <button class="btn" onclick="connectWifi()"
-                        style="border-color:var(--secondary); color:var(--secondary)">Connect</button>
+
+                <!-- TAB 2: SCAN -->
+                <div id="tab-scan" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2>Network Discovery</h2>
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn" onclick="scanDevices('quick')">QUICK</button>
+                                <button class="btn" onclick="scanDevices('full')">DEEP</button>
+                            </div>
+                        </div>
+                        <div style="font-size:0.8rem; color:var(--text-dim); margin-bottom:15px">
+                            Discovered devices populate the right sidebar inventory.
+                        </div>
+
+                        <div class="panel-header" style="margin-top:30px">
+                            <h2>Advanced Recon (Target Selection Required)</h2>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                            <button class="btn" onclick="runAction('recon', {mode:'web'})">WEB ENUM</button>
+                            <button class="btn" onclick="runAction('recon', {mode:'smb'})">SMB ENUM</button>
+                            <button class="btn" onclick="runAction('recon', {mode:'dns'})">DNS ENUM</button>
+                            <button class="btn" onclick="runAction('recon', {mode:'arp'})">ARP SCAN</button>
+                            <button class="btn" onclick="runAction('recon', {mode:'comprehensive'})">FULL RECON</button>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- TAB 3: ATTACK -->
+                <div id="tab-attack" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2>WiFi Attack Vectors</h2>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                            <button class="btn secondary" onclick="runAction('deauth')">DEAUTH</button>
+                            <button class="btn secondary" onclick="runAction('evil_twin')">EVIL TWIN</button>
+                            <button class="btn secondary" onclick="runAction('handshake')">HANDSHAKE</button>
+                            <button class="btn secondary" onclick="runAction('crack')">CRACK PASS</button>
+                            <button class="btn secondary" style="grid-column: span 2"
+                                onclick="runAction('wifite')">AUTO-PILOT (WIFITE)</button>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2>Advanced Modern Attacks</h2>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                            <button class="btn" style="border-color:var(--accent); color:var(--accent)"
+                                onclick="runAction('pmkid')">PMKID SNIPER</button>
+                            <button class="btn" style="border-color:var(--accent); color:var(--accent)"
+                                onclick="runAction('pixie')">WPS PIXIE</button>
+                            <button class="btn" style="border-color:#ffcc00; color:#ffcc00"
+                                onclick="runAction('beacon')">BEACON CHAOS</button>
+                            <button class="btn" style="border-color:#ffcc00; color:#ffcc00"
+                                onclick="runAction('auth')">AUTH REBOOT</button>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2>Bandwidth Throttling</h2>
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <select id="throttle-speed"
+                                style="background:var(--bg); color:var(--text); border:1px solid var(--border); padding:10px; border-radius:4px; flex:1">
+                                <option value="56kbit">56kbps (Dial-up)</option>
+                                <option value="256kbit">256kbps (Very Slow)</option>
+                                <option value="1mbit" selected>1mbps (Laggy)</option>
+                                <option value="5mbit">5mbps (Limit HD)</option>
+                            </select>
+                            <button class="btn"
+                                onclick="runAction('throttle', {speed: document.getElementById('throttle-speed').value})">START
+                                LIMIT</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: SCENARIOS -->
+                <div id="tab-scenarios" class="tab-content">
+                    <div class="scenario-grid">
+                        <div class="scenario-card" onclick="runScenario('wifi_audit')">
+                            <span class="material-icons scenario-icon" style="color:var(--primary)">security</span>
+                            <div class="scenario-title">WiFi Audit</div>
+                            <div class="scenario-desc">Scan, Capture, and Test WPS security on all nearby networks.
+                            </div>
+                        </div>
+                        <div class="scenario-card" onclick="runScenario('network_sweep')">
+                            <span class="material-icons scenario-icon" style="color:var(--secondary)">searching</span>
+                            <div class="scenario-title">Net Sweep</div>
+                            <div class="scenario-desc">Full discovery of all hosts, open ports, and active services.
+                            </div>
+                        </div>
+                        <div class="scenario-card" onclick="runScenario('web_hunt')">
+                            <span class="material-icons scenario-icon" style="color:var(--accent)">language</span>
+                            <div class="scenario-title">Web Hunt</div>
+                            <div class="scenario-desc">Automatically find and enumerate every web server on the network.
+                            </div>
+                        </div>
+                        <div class="scenario-card" onclick="runScenario('stealth_recon')">
+                            <span class="material-icons scenario-icon"
+                                style="color:var(--primary)">visibility_off</span>
+                            <div class="scenario-title">Stealth</div>
+                            <div class="scenario-desc">Quiet SYN scanning with decoys to avoid IDA/IPS detection.</div>
+                        </div>
+                        <div class="scenario-card" onclick="runScenario('quick_check')">
+                            <span class="material-icons scenario-icon" style="color:var(--text)">speed</span>
+                            <div class="scenario-title">Quick Check</div>
+                            <div class="scenario-desc">Fast 5-minute assessment of critical network vulnerabilities.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: REPORTS -->
+                <div id="tab-reports" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2>Operations Summary</h2>
+                        </div>
+                        <table style="width:100%; border-collapse: collapse; font-size:0.85rem">
+                            <thead
+                                style="border-bottom: 2px solid var(--border); text-align: left; color:var(--text-dim)">
+                                <tr>
+                                    <th style="padding:10px">TIME</th>
+                                    <th>TYPE</th>
+                                    <th>TARGET</th>
+                                    <th>STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reports-body">
+                                <!-- Data from JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 6: SYSTEM -->
+                <div id="tab-system" class="tab-content">
+                    <div class="panel">
+                        <h2>Maintenance</h2>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:20px;">
+                            <button class="btn" onclick="runAction('reboot')">REBOOT</button>
+                            <button class="btn secondary" onclick="runAction('shutdown')">SHUTDOWN</button>
+                            <button class="btn" style="grid-column: span 2" onclick="runAction('restore_hdmi')">SWITCH
+                                TO HDMI (DISPLAY FIX)</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Sidebar: Global Info -->
+            <div class="sidebar">
+                <!-- Device Inventory -->
+                <div class="panel" style="flex: 1; display:flex; flex-direction:column">
+                    <div class="panel-header">
+                        <h2>Inventory</h2>
+                        <button class="btn" style="padding:4px 8px; font-size:0.6rem"
+                            onclick="api('/api/devices/clear', 'POST').then(loadDeviceList)">CLEAR</button>
+                    </div>
+                    <div id="inventory-list" class="device-list" style="flex:1; overflow-y:auto">
+                        <!-- Devices from JS -->
+                    </div>
+                    <div style="margin-top:15px; border-top: 1px solid var(--border); padding-top:15px;">
+                        <div class="stat-label" style="font-size:0.7rem">ACTIVE TARGET:</div>
+                        <div class="active-target-badge"
+                            style="font-family:var(--font-mono); color:var(--secondary); font-size:0.8rem">NONE SELECTED
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time HUD Log -->
+                <div class="panel" style="height: 250px; display:flex; flex-direction:column">
+                    <h2>Live HUD</h2>
+                    <div id="attack-log" class="log-container">
+                        <!-- Logs here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Virtual Keyboard -->
+    <div id="keyboard">
+        <!-- Numbers -->
+        <div class="key" onclick="typeKey('1')">1</div>
+        <div class="key" onclick="typeKey('2')">2</div>
+        <div class="key" onclick="typeKey('3')">3</div>
+        <div class="key" onclick="typeKey('4')">4</div>
+        <div class="key" onclick="typeKey('5')">5</div>
+        <div class="key" onclick="typeKey('6')">6</div>
+        <div class="key" onclick="typeKey('7')">7</div>
+        <div class="key" onclick="typeKey('8')">8</div>
+        <div class="key" onclick="typeKey('9')">9</div>
+        <div class="key" onclick="typeKey('0')">0</div>
+
+        <!-- Letters (Simplified QWERTY) -->
+        <div class="key" onclick="typeKey('Q')">Q</div>
+        <div class="key" onclick="typeKey('W')">W</div>
+        <div class="key" onclick="typeKey('E')">E</div>
+        <div class="key" onclick="typeKey('R')">R</div>
+        <div class="key" onclick="typeKey('T')">T</div>
+        <div class="key" onclick="typeKey('Y')">Y</div>
+        <div class="key" onclick="typeKey('U')">U</div>
+        <div class="key" onclick="typeKey('I')">I</div>
+        <div class="key" onclick="typeKey('O')">O</div>
+        <div class="key" onclick="typeKey('P')">P</div>
+
+        <div class="key" onclick="typeKey('A')">A</div>
+        <div class="key" onclick="typeKey('S')">S</div>
+        <div class="key" onclick="typeKey('D')">D</div>
+        <div class="key" onclick="typeKey('F')">F</div>
+        <div class="key" onclick="typeKey('G')">G</div>
+        <div class="key" onclick="typeKey('H')">H</div>
+        <div class="key" onclick="typeKey('J')">J</div>
+        <div class="key" onclick="typeKey('K')">K</div>
+        <div class="key" onclick="typeKey('L')">L</div>
+        <div class="key" style="background:var(--secondary)" onclick="typeKey('BACK')">BCK</div>
+
+        <div class="key" onclick="typeKey('Z')">Z</div>
+        <div class="key" onclick="typeKey('X')">X</div>
+        <div class="key" onclick="typeKey('C')">C</div>
+        <div class="key" onclick="typeKey('V')">V</div>
+        <div class="key" onclick="typeKey('B')">B</div>
+        <div class="key" onclick="typeKey('N')">N</div>
+        <div class="key" onclick="typeKey('M')">M</div>
+        <div class="key" onclick="typeKey('-')">-</div>
+        <div class="key" onclick="typeKey('_')">_</div>
+        <div class="key" style="background:var(--primary); color:var(--bg)" onclick="typeKey('ENTER')">ENT</div>
+    </div>
+
+    <!-- Device Detail Modal -->
+    <div id="device-modal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h2 id="modal-title" style="margin-bottom:20px">DEVICE DETAILS</h2>
+            <div id="modal-content">
+                <div class="stat-item"><span class="stat-label">IP:</span> <span id="det-ip" class="stat-value">-</span>
+                </div>
+                <div class="stat-item"><span class="stat-label">MAC:</span> <span id="det-mac"
+                        class="stat-value">-</span></div>
+                <div class="stat-item"><span class="stat-label">VENDOR:</span> <span id="det-vendor"
+                        class="stat-value">-</span></div>
+
+                <h3 style="font-size:0.8rem; margin:20px 0 10px; color:var(--primary)">OPEN PORTS</h3>
+                <div id="det-ports" class="tag-container">-</div>
+
+                <h3 style="font-size:0.8rem; margin:20px 0 10px; color:var(--primary)">NOTES</h3>
+                <textarea id="det-notes"
+                    style="width:100%; height:80px; background:rgba(0,0,0,0.3); color:var(--text); border:1px solid var(--border); padding:10px; border-radius:4px; font-family:var(--font-mono); font-size:0.8rem;"></textarea>
+
+                <h3 style="font-size:0.8rem; margin:20px 0 10px; color:var(--primary)">TAGS (Comma separated)</h3>
+                <input type="text" id="det-tags" style="margin-bottom:20px">
+
+                <button class="btn" style="width:100%" onclick="saveDeviceMetadata()">SAVE CHANGES</button>
             </div>
         </div>
+    </div>
 
-        <!-- TAB 2: SCAN -->
-        <div id="tab-scan" class="tab-content">
-            <div class="panel" style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <h2>Radar</h2>
-                    <div style="font-size:10px; color:var(--text-dim)">Tap a card to target</div>
-                </div>
-                <button class="btn" style="width:auto; padding:8px 20px;" onclick="startScan()">SCAN (15s)</button>
-            </div>
-            <div id="scan-results" class="scan-grid">
-                <!-- Scan Cards -->
-            </div>
-
-            <div class="panel" style="margin-top:20px;">
-                <h2>Network Recon (Nmap)</h2>
-                <input type="text" id="recon-target" placeholder="Target IP (e.g. 192.168.1.1)" />
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <button class="btn" onclick="runRecon('quick')">Quick</button>
-                    <button class="btn" onclick="runRecon('full')">Full</button>
-                    <button class="btn" onclick="runRecon('stealth')">Stealth</button>
-                    <button class="btn" onclick="runRecon('vuln')">Vuln</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 3: ATTACK -->
-        <div id="tab-attack" class="tab-content">
-            <div class="panel">
-                <h2>Active Target</h2>
-                <div id="target-display"
-                    style="text-align:center; padding: 20px; border: 1px dashed var(--text-dim); margin-bottom:15px;">
-                    NO TARGET SELECTED
-                    <br><span style="font-size:10px; color:#666">Select from SCAN tab</span>
-                </div>
-
-                <button class="btn danger" onclick="runAttack('deauth')">LAUNCH DEAUTH</button>
-                <button class="btn danger" onclick="runAttack('evil_twin')">LAUNCH EVIL TWIN</button>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <button class="btn warning" style="border-color:var(--warning); color:var(--warning)"
-                        onclick="runAttack('handshake')">CAPTURE HS</button>
-                    <button class="btn warning" style="border-color:var(--warning); color:var(--warning)"
-                        onclick="runAttack('crack')">CRACK HS</button>
-                </div>
-                <button class="btn" onclick="runAttack('wifite')">AUTO-PWN (WIFITE)</button>
-                <button class="btn" onclick="stopMonitor()">STOP / RESET</button>
-            </div>
-            <div class="panel">
-                <h2>Attack Log</h2>
-                <div id="attack-log"
-                    style="font-family:var(--font-mono); font-size:10px; color:var(--primary); height:80px; overflow-y:auto;">
-                    > System ready...
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 4: REPORTS (NEW) -->
-        <div id="tab-reports" class="tab-content">
-            <div class="panel">
-                <h2>Activity Log</h2>
-                <table class="report-table">
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Target</th>
-                            <th>Status.</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reports-body">
-                        <!-- Populated by JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- TAB 5: SYSTEM -->
-        <div id="tab-system" class="tab-content">
-            <div class="panel">
-                <h2>System Status</h2>
-                <div id="sys-metrics" style="line-height:1.6; font-size:12px;">
-                    Loading...
-                </div>
-            </div>
-            <button class="btn" onclick="api('/api/action/reboot')">REBOOT SYSTEM</button>
-            <button class="btn" style="border-color:var(--text-dim); color:var(--text-dim)"
-                onclick="api('/api/action/restore_hdmi')">SWITCH TO HDMI (DISABLE LCD)</button>
-            <button class="btn danger" onclick="api('/api/action/shutdown')">SHUTDOWN</button>
-        </div>
-    </main>
-
-    <footer>
-        <button class="tab-btn active" onclick="switchTab('connect')"><i>📶</i>CONN</button>
-        <button class="tab-btn" onclick="switchTab('scan')"><i>📡</i>SCAN</button>
-        <button class="tab-btn" onclick="switchTab('attack')"><i>⚔️</i>ATK</button>
-        <button class="tab-btn" onclick="switchTab('reports')"><i>📄</i>LOGS</button>
-        <button class="tab-btn" onclick="switchTab('system')"><i>⚙️</i>SYS</button>
-    </footer>
-
-    <script>
-        // --- Core ---
-        let CURRENT_TARGET = null;
-
-        function switchTab(id) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-
-            document.getElementById('tab-' + id).classList.add('active');
-            // Find button roughly
-            const buttons = document.querySelectorAll('.tab-btn');
-            const map = { 'connect': 0, 'scan': 1, 'attack': 2, 'reports': 3, 'system': 4 };
-            if (map[id] !== undefined) buttons[map[id]].classList.add('active');
-
-            if (id === 'reports') loadReports();
-            if (id === 'system') loadSystem();
-            if (id === 'connect') scanWifi(); // Auto scan on tab open
-        }
-
-        async function api(url, method = 'GET', body = null) {
-            try {
-                const opts = { method };
-                if (body) {
-                    opts.headers = { 'Content-Type': 'application/json' };
-                    opts.body = JSON.stringify(body);
-                }
-                const res = await fetch(url, opts);
-                const data = await res.json();
-                return data;
-            } catch (e) {
-                console.error(e);
-                return { error: 'Connection Failed' };
-            }
-        }
-
-        function log(msg) {
-            const el = document.getElementById('attack-log');
-            el.innerHTML += `> ${msg}<br>`;
-            el.scrollTop = el.scrollHeight;
-        }
-
-        // --- Features ---
-
-        // 1. WiFi & Keyboard
-        const kb = document.getElementById('keyboard');
-        const keys = "1234567890qwertyuiopasdfghjklzxcvbnm._@";
-        keys.split('').forEach(char => {
-            const k = document.createElement('div');
-            k.className = 'key'; k.textContent = char;
-            k.onclick = () => document.getElementById('wifi-pass').value += char;
-            kb.appendChild(k);
-        });
-        // Backspace
-        const bk = document.createElement('div');
-        bk.className = 'key'; bk.textContent = '←'; bk.style.gridColumn = 'span 2';
-        bk.onclick = () => { const i = document.getElementById('wifi-pass'); i.value = i.value.slice(0, -1); };
-        kb.appendChild(bk);
-
-        async function scanWifi() {
-            try {
-                const list = document.getElementById('wifi-list');
-                list.innerHTML = '<div style="text-align:center">Scanning...</div>';
-
-                const res = await api('/api/wifi/networks');
-
-                if (res.error) {
-                    list.innerHTML = `<div style="text-align:center;color:var(--danger)">Error: ${res.error}</div>`;
-                    log(`ERROR: ${res.error}`);
-                    return;
-                }
-
-                list.innerHTML = '';
-                if (res.networks && res.networks.length > 0) {
-                    res.networks.forEach(n => {
-                        const row = document.createElement('div');
-                        row.style.padding = "8px";
-                        row.style.borderBottom = "1px solid #333";
-                        row.style.cursor = "pointer";
-                        row.innerHTML = `<span style="color:#fff">${n.ssid}</span> <span style="font-size:10px;color:#666">${n.signal}%</span>`;
-                        row.onclick = () => {
-                            document.getElementById('wifi-pass').placeholder = `Pass for ${n.ssid}`;
-                            window.SELECTED_WIFI = n.ssid;
-                        };
-                        list.appendChild(row);
-                    });
-                    log(`✓ Found ${res.networks.length} networks`);
-                } else {
-                    list.innerHTML = '<div style="text-align:center;color:#666">No networks found</div>';
-                    log("No WiFi networks detected");
-                }
-            } catch (err) {
-                const list = document.getElementById('wifi-list');
-                list.innerHTML = `<div style="text-align:center;color:var(--danger)">Scan failed</div>`;
-                log(`ERROR: ${err.message}`);
-            }
-        }
-
-        async function connectWifi() {
-            try {
-                if (!window.SELECTED_WIFI) {
-                    alert("Select a network first");
-                    log("ERROR: No WiFi network selected");
-                    return;
-                }
-
-                const pass = document.getElementById('wifi-pass').value;
-                log(`Connecting to ${window.SELECTED_WIFI}...`);
-
-                const res = await api('/api/wifi/connect', 'POST', { ssid: window.SELECTED_WIFI, password: pass });
-
-                if (res.error) {
-                    log(`ERROR: ${res.error}`);
-                    alert(`Connection Error: ${res.error}`);
-                    return;
-                }
-
-                if (res.status === 'success') {
-                    log(`✓ Connecting to ${window.SELECTED_WIFI}`);
-                    log(res.message || "Connection in progress");
-                }
-            } catch (err) {
-                log(`ERROR: ${err.message}`);
-                alert(`Failed to connect: ${err.message}`);
-            }
-        }
-
-        // 2. Scan & Target
-        async function startScan() {
-            try {
-                log("Starting 15s WiFi scan...");
-                const res = await api('/api/scan/start');
-
-                if (res.error) {
-                    log(`ERROR: ${res.error}`);
-                    alert(`Scan Error: ${res.error}`);
-                    return;
-                }
-
-                if (res.status === 'success') {
-                    log("✓ Scan started successfully");
-                    log("Waiting 15 seconds for results...");
-                    setTimeout(loadScanResults, 15000);
-                } else {
-                    log("WARNING: Unexpected response from server");
-                }
-            } catch (err) {
-                log(`ERROR: ${err.message}`);
-                alert(`Failed to start scan: ${err.message}`);
-            }
-        }
-
-        async function loadScanResults() {
-            const res = await api('/api/scan/results');
-            const grid = document.getElementById('scan-results');
-            grid.innerHTML = '';
-            if (res.networks) {
-                res.networks.forEach(n => {
-                    const card = document.createElement('div');
-                    card.className = 'net-card';
-                    card.innerHTML = `<div style="color:var(--primary); font-weight:bold">${n.essid || 'Hidden'}</div><div style="font-size:10px; color:#888">${n.bssid}<br>Ch: ${n.channel} | Pwr: ${n.power}</div>`;
-                    card.onclick = () => selectTarget(n, card);
-                    grid.appendChild(card);
-                });
-            }
-        }
-
-        async function selectTarget(net, el) {
-            document.querySelectorAll('.net-card').forEach(c => c.classList.remove('selected'));
-            el.classList.add('selected');
-            CURRENT_TARGET = net;
-
-            // Pre-fill Recon Input
-            // Heuristic. Airodump doesn't give IP. We just help user context.
-            // If they want to scan it, they might need to find IP first.
-            // But we can put MAC addr for reference or nothing.
-
-            // Update Backend
-            await api('/api/target/select', 'POST', net);
-
-            // Update UI
-            document.getElementById('target-display').innerHTML = `
-                <div style="font-size:18px; color:var(--primary)">${net.essid}</div>
-                <div style="font-size:12px; color:#888">${net.bssid}</div>
-                <div style="font-size:12px; color:var(--secondary)">Channel ${net.channel}</div>
-            `;
-            document.getElementById('header-status').textContent = "TARGET: " + net.essid.substring(0, 8);
-            document.getElementById('header-status').className = "status-badge active";
-        }
-
-        // 3. Attacks
-        async function runAttack(type) {
-            try {
-                if (!CURRENT_TARGET && type !== 'wifite') {
-                    alert("No Target Selected!");
-                    log("ERROR: No target selected for " + type);
-                    return;
-                }
-
-                log(`Launching ${type.toUpperCase()}...`);
-                const res = await api('/api/action/' + type, 'POST');
-
-                if (res.error) {
-                    log(`ERROR: ${res.error}`);
-                    alert(`Attack Error: ${res.error}`);
-                    return;
-                }
-
-                if (res.status === 'success') {
-                    log(`✓ ${type.toUpperCase()} attack launched`);
-                    log(res.message || "Check REPORTS tab for status");
-                } else if (res.message) {
-                    log(res.message);
-                }
-            } catch (err) {
-                log(`ERROR: ${err.message}`);
-                alert(`Failed to launch ${type}: ${err.message}`);
-            }
-        }
-
-        async function runRecon(mode) {
-            try {
-                const target = document.getElementById('recon-target').value;
-                if (!target) {
-                    alert("Enter Target IP");
-                    log("ERROR: No target IP specified");
-                    return;
-                }
-
-                log(`Starting ${mode.toUpperCase()} scan on ${target}...`);
-                const res = await api('/api/action/recon', 'POST', { target, mode });
-
-                if (res.error) {
-                    log(`ERROR: ${res.error}`);
-                    alert(`Recon Error: ${res.error}`);
-                    return;
-                }
-
-                if (res.status === 'success') {
-                    log(`✓ ${mode.toUpperCase()} scan started on ${target}`);
-                    log("Check REPORTS tab for results");
-                } else if (res.message) {
-                    log(res.message);
-                }
-            } catch (err) {
-                log(`ERROR: ${err.message}`);
-                alert(`Failed to start recon: ${err.message}`);
-            }
-        }
-
-        async function stopMonitor() {
-            await api('/api/action/monitor/off');
-            log('Monitor mode stopped.');
-        }
-
-        // 4. Reports
-        async function loadReports() {
-            const res = await api('/api/reports');
-            const tbody = document.getElementById('reports-body');
-            tbody.innerHTML = '';
-            if (res.reports) {
-                res.reports.forEach(r => {
-                    const tr = document.createElement('tr');
-                    let color = '#888';
-                    if (r.status === 'Success' || r.status === 'Running') color = 'var(--secondary)';
-
-                    tr.innerHTML = `
-                        <td>${r.type}</td>
-                        <td style="color:#fff">${r.target}</td>
-                        <td><span class="status-dot" style="background:${color}"></span>${r.status}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-        }
-
-        // 5. System
-        async function loadSystem() {
-            const res = await api('/api/system');
-            document.getElementById('sys-metrics').innerHTML = `
-                <span style="color:#888">IP:</span> ${res.ip}<br>
-                <span style="color:#888">CPU:</span> ${res.cpu}% <span style="color:#888">TMP:</span> ${res.temp}<br>
-                <span style="color:#888">MEM:</span> ${res.memory}<br>
-                <span style="color:#888">DSK:</span> ${res.disk}
-            `;
-        }
-
-        // Init
-        loadScanResults(); // Load any cached results on boot
-    </script>
+    <script src="app.js"></script>
 </body>
 
 </html>

