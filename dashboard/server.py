@@ -469,8 +469,17 @@ def action_shutdown():
 def action_restore_hdmi():
     """Switch to HDMI output"""
     try:
-        cmd = f"sudo {VOIDPWN_DIR}/scripts/core/restore_hdmi.sh"
-        subprocess.Popen(cmd.split())
+        # Use shell=True to ensure proper execution
+        cmd = f"{VOIDPWN_DIR}/scripts/core/restore_hdmi.sh"
+        subprocess.Popen(cmd, shell=True)
+        
+        reporter.add_report(
+            "SYSTEM", 
+            "Display", 
+            "Rebooting", 
+            "Switching to HDMI output"
+        )
+        
         return jsonify({'status': 'success', 'message': 'Switching to HDMI & Rebooting...'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
