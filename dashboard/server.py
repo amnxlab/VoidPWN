@@ -5,7 +5,7 @@ VoidPWN Dashboard Server
 Simple Flask server to provide API endpoints for the dashboard
 """
 
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request
 import subprocess
 import os
 import glob
@@ -143,7 +143,7 @@ class DeviceManager:
     def get_selected(self):
         return self.selected_device
 
-app = Flask(__name__, static_folder='.')
+app = Flask(__name__, static_folder='.', static_url_path='')
 
 # Configuration
 # Dynamic path: server.py is in /dashboard/ -> Project root is one level up
