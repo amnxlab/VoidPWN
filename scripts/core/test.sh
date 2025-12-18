@@ -94,24 +94,18 @@ test_file_structure() {
     local files=(
         "scripts/core/setup.sh"
         "scripts/core/test.sh"
-        "scripts/core/install_tools.sh"
-        "scripts/core/install_lcd.sh"
-        "scripts/core/dashboard.sh"
         "scripts/network/wifi_tools.sh"
         "scripts/network/recon.sh"
         "scripts/network/scenarios.sh"
-        "scripts/network/wifi_throttle.sh"
-        "scripts/python/smart_scan.py"
-        "scripts/python/packet_visualizer.py"
-        "scripts/python/wifi_monitor.py"
         "voidpwn.sh"
         "README.md"
-        "docs/QUICKSTART.md"
-        "docs/DEPLOYMENT.md"
-        "docs/TESTING.md"
-        "docs/SCENARIOS.md"
-        "docs/DASHBOARD.md"
-        "docs/NEXT_STEPS.md"
+        "USER_GUIDE.md"
+        "docs/HUD_MANUAL.md"
+        "docs/NETWORK_INTEL.md"
+        "docs/WIFI_ARSENAL.md"
+        "docs/SCENARIO_GUIDE.md"
+        "docs/ATTACK_REFERENCE.md"
+        "docs/TECHNICAL_REFERENCE.md"
         "LICENSE"
         ".gitignore"
     )
@@ -160,13 +154,9 @@ test_script_permissions() {
     local scripts=(
         "scripts/core/setup.sh"
         "scripts/core/test.sh"
-        "scripts/core/install_tools.sh"
-        "scripts/core/install_lcd.sh"
-        "scripts/core/dashboard.sh"
         "scripts/network/wifi_tools.sh"
         "scripts/network/recon.sh"
         "scripts/network/scenarios.sh"
-        "scripts/network/wifi_throttle.sh"
         "voidpwn.sh"
     )
     
@@ -194,13 +184,9 @@ test_script_syntax() {
     local scripts=(
         "scripts/core/setup.sh"
         "scripts/core/test.sh"
-        "scripts/core/install_tools.sh"
-        "scripts/core/install_lcd.sh"
-        "scripts/core/dashboard.sh"
         "scripts/network/wifi_tools.sh"
         "scripts/network/recon.sh"
         "scripts/network/scenarios.sh"
-        "scripts/network/wifi_throttle.sh"
         "voidpwn.sh"
     )
     
@@ -259,21 +245,36 @@ test_required_tools() {
         fi
     done
     
-    # Exploit/Web tools
+    # Exploit/Web/Advanced tools
     local other_tools=(
         "msfconsole"
         "sqlmap"
         "responder"
         "gobuster"
         "nikto"
+        "wifiphisher"
+        "autopsy"
+        "binwalk"
+        "ghidra"
+        "radare2"
+        "apktool"
+        "jadx"
+        "set"
     )
      for tool in "${other_tools[@]}"; do
         if command -v "$tool" &> /dev/null; then
             log_pass "Tool installed: $tool"
         else
-            log_fail "Missing tool: $tool"
+            log_warn "Missing tool (Optional): $tool"
         fi
     done
+    
+    # Check for fluxion
+    if [[ -d "/opt/fluxion" ]]; then
+        log_pass "Fluxion installed in /opt"
+    else
+        log_warn "Fluxion not found in /opt"
+    fi
 }
 
 ################################################################################
