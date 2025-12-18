@@ -213,18 +213,17 @@ async function loadInterfaces() {
         list.innerHTML = '';
         res.interfaces.forEach(nic => {
             const row = document.createElement('div');
-            row.className = 'device-card';
+            row.className = `device-card ${state.selectedNetwork?.cidr?.includes(nic.ip.split('.').slice(0, 3).join('.')) ? 'selected' : ''}`;
+            row.style.cursor = 'pointer';
             row.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px">
                     <span style="font-weight:bold">${nic.name}</span>
                     <span style="color:var(--primary); font-size:0.8rem">${nic.ip}</span>
                 </div>
-                <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:8px">Speed: ${nic.speed}Mb/s</div>
-                <div class="card-actions">
-                    <button class="btn-mini" onclick="event.stopPropagation(); selectInterface('${nic.name}', '${nic.ip}')">SET TARGET</button>
-                    <button class="btn-mini" style="border-color:var(--secondary)" onclick="event.stopPropagation(); scanSubnet('${nic.name}', '${nic.ip}')">SCAN SUBNET</button>
-                </div>
+                <div style="font-size:0.75rem; color:var(--text-dim)">Speed: ${nic.speed}Mb/s</div>
+                <div style="font-size:0.65rem; color:var(--primary); margin-top:5px; text-transform:uppercase">Click to set target subnet</div>
             `;
+            row.onclick = () => selectInterface(nic.name, nic.ip);
             list.appendChild(row);
         });
     }
@@ -233,12 +232,15 @@ async function loadInterfaces() {
 async function selectInterface(name, ip) {
     if (ip === "N/A" || !ip) return log("Interface has no IP!", "error");
     const subnet = ip.split('.').slice(0, 3).join('.') + '.0/24';
-    log(`Setting target to subnet: ${subnet}...`);
+    log(`SETTING TARGET SUBNET: ${subnet}...`, 'info');
     const res = await api('/api/target/subnet', 'POST', { subnet });
     if (res.status === 'success') {
         state.selectedNetwork = res.target;
+        state.selectedDevice = null; // Clear selected device when switching subnets
         updateTargetDisplays();
-        log(`TARGET UPDATED: ${subnet}`, 'success');
+        renderDeviceList(); // Refresh inventory to show subnet card
+        loadInterfaces(); // Refresh interface list to show selection
+        log(`✓ Target updated to ${subnet}`, 'success');
     }
 }
 
