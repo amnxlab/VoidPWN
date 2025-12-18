@@ -309,27 +309,29 @@ def start_scan():
     """Start a background airodump scan for attacks"""
     global SCAN_RUNNING
     try:
-        # Stop existing
+        # Use wifi_tools.sh to perform scan
+        output_dir = os.path.join(VOIDPWN_DIR, 'output', 'captures')
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Kill any existing scans
         subprocess.run(['sudo', 'killall', 'airodump-ng'], stderr=subprocess.DEVNULL)
         
-        # Start new scan (csv output)
-        output_base = os.path.join(VOIDPWN_DIR, 'output', 'scan_results')
-        # Clean old
-        subprocess.run(f"rm {output_base}-*", shell=True, stderr=subprocess.DEVNULL)
+        # Clean old scan results
+        output_base = os.path.join(output_dir, 'scan_results')
+        subprocess.run(f"sudo rm -f {output_base}*", shell=True, stderr=subprocess.DEVNULL)
         
-        # We need to release the interface from NM for a moment if using the same one, 
-        # but for simplicity we assume the attack interface is configured via wifi_tools.sh logic
-        # We'll call a helper wrapper that runs scan for X seconds then exits
+        # Start scan using wifi_tools.sh --scan (15 second scan)
+        cmd = f"{VOIDPWN_DIR}/scripts/network/wifi_tools.sh --scan"
+        subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         
-        cmd = f"sudo timeout 15s airodump-ng wlan1mon -w {output_base} --output-format csv"
-        # Since we can't easily rely on 'wlan1mon' being up without checks, we reuse the tool logic
-        # For this prototype, let's trigger the tool in scan mode
+        SCAN_RUNNING = True
         
-        # BETTER APPROACH: Use the tool script to generating a scan dump
-        # Modify wifi_tools.sh later to support --scan-dump
-        
-        # Fallback: Just read the file if it exists, assume the user ran a scan
-        # Real implementation: Async job
+        reporter.add_report(
+            "SCAN", 
+            "WiFi Networks", 
+            "Running", 
+            "15-second network scan started"
+        )
         
         return jsonify({'status': 'success', 'message': 'Scan started (15s)...'})
     except Exception as e:

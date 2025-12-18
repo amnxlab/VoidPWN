@@ -461,31 +461,71 @@
         kb.appendChild(bk);
 
         async function scanWifi() {
-            const list = document.getElementById('wifi-list');
-            list.innerHTML = '<div style="text-align:center">Scanning...</div>';
-            const res = await api('/api/wifi/networks');
-            list.innerHTML = '';
-            if (res.networks) {
-                res.networks.forEach(n => {
-                    const row = document.createElement('div');
-                    row.style.padding = "8px";
-                    row.style.borderBottom = "1px solid #333";
-                    row.style.cursor = "pointer";
-                    row.innerHTML = `<span style="color:#fff">${n.ssid}</span> <span style="font-size:10px;color:#666">${n.signal}%</span>`;
-                    row.onclick = () => {
-                        document.getElementById('wifi-pass').placeholder = `Pass for ${n.ssid}`;
-                        window.SELECTED_WIFI = n.ssid;
-                    };
-                    list.appendChild(row);
-                });
+            try {
+                const list = document.getElementById('wifi-list');
+                list.innerHTML = '<div style="text-align:center">Scanning...</div>';
+
+                const res = await api('/api/wifi/networks');
+
+                if (res.error) {
+                    list.innerHTML = `<div style="text-align:center;color:var(--danger)">Error: ${res.error}</div>`;
+                    log(`ERROR: ${res.error}`);
+                    return;
+                }
+
+                list.innerHTML = '';
+                if (res.networks && res.networks.length > 0) {
+                    res.networks.forEach(n => {
+                        const row = document.createElement('div');
+                        row.style.padding = "8px";
+                        row.style.borderBottom = "1px solid #333";
+                        row.style.cursor = "pointer";
+                        row.innerHTML = `<span style="color:#fff">${n.ssid}</span> <span style="font-size:10px;color:#666">${n.signal}%</span>`;
+                        row.onclick = () => {
+                            document.getElementById('wifi-pass').placeholder = `Pass for ${n.ssid}`;
+                            window.SELECTED_WIFI = n.ssid;
+                        };
+                        list.appendChild(row);
+                    });
+                    log(`✓ Found ${res.networks.length} networks`);
+                } else {
+                    list.innerHTML = '<div style="text-align:center;color:#666">No networks found</div>';
+                    log("No WiFi networks detected");
+                }
+            } catch (err) {
+                const list = document.getElementById('wifi-list');
+                list.innerHTML = `<div style="text-align:center;color:var(--danger)">Scan failed</div>`;
+                log(`ERROR: ${err.message}`);
             }
         }
 
         async function connectWifi() {
-            if (!window.SELECTED_WIFI) return alert("Select a network first");
-            const pass = document.getElementById('wifi-pass').value;
-            log(`Connecting to ${window.SELECTED_WIFI}...`);
-            api('/api/wifi/connect', 'POST', { ssid: window.SELECTED_WIFI, password: pass });
+            try {
+                if (!window.SELECTED_WIFI) {
+                    alert("Select a network first");
+                    log("ERROR: No WiFi network selected");
+                    return;
+                }
+
+                const pass = document.getElementById('wifi-pass').value;
+                log(`Connecting to ${window.SELECTED_WIFI}...`);
+
+                const res = await api('/api/wifi/connect', 'POST', { ssid: window.SELECTED_WIFI, password: pass });
+
+                if (res.error) {
+                    log(`ERROR: ${res.error}`);
+                    alert(`Connection Error: ${res.error}`);
+                    return;
+                }
+
+                if (res.status === 'success') {
+                    log(`✓ Connecting to ${window.SELECTED_WIFI}`);
+                    log(res.message || "Connection in progress");
+                }
+            } catch (err) {
+                log(`ERROR: ${err.message}`);
+                alert(`Failed to connect: ${err.message}`);
+            }
         }
 
         // 2. Scan & Target
@@ -553,10 +593,32 @@
 
         // 3. Attacks
         async function runAttack(type) {
-            if (!CURRENT_TARGET && type !== 'wifite') return alert("No Target Selected!");
-            log(`Launching ${type}...`);
-            const res = await api('/api/action/' + type, 'POST');
-            if (res.message) log(res.message);
+            try {
+                if (!CURRENT_TARGET && type !== 'wifite') {
+                    alert("No Target Selected!");
+                    log("ERROR: No target selected for " + type);
+                    return;
+                }
+
+                log(`Launching ${type.toUpperCase()}...`);
+                const res = await api('/api/action/' + type, 'POST');
+
+                if (res.error) {
+                    log(`ERROR: ${res.error}`);
+                    alert(`Attack Error: ${res.error}`);
+                    return;
+                }
+
+                if (res.status === 'success') {
+                    log(`✓ ${type.toUpperCase()} attack launched`);
+                    log(res.message || "Check REPORTS tab for status");
+                } else if (res.message) {
+                    log(res.message);
+                }
+            } catch (err) {
+                log(`ERROR: ${err.message}`);
+                alert(`Failed to launch ${type}: ${err.message}`);
+            }
         }
 
         async function runRecon(mode) {
