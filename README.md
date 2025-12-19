@@ -5,8 +5,8 @@
 ---
 
 # VoidPWN: Automated Penetration Testing Platform
-## Comprehensive Penetration Testing Platform for Raspberry Pi
-> *Empowering security research with professional auditing tools and an intuitive dashboard.*
+## Advanced Network Security Auditing for Raspberry Pi
+> *A professional-grade toolkit for automated reconnaissance, wireless auditing, and field operations.*
 
 ---
 
@@ -16,180 +16,124 @@
 
 ---
 
-## 💻 Cross-Platform Operational HUD
-VoidPWN is designed for flexibility. The dashboard is a responsive web application that can be accessed across multiple devices simultaneously. Whether you are using the built-in **Raspberry Pi TFT display**, a **PC/Laptop**, or your **Smartphone**, you get the same powerful interface.
+## 💻 Multi-Platform Operational HUD
+VoidPWN provides a responsive, operator-centric web interface accessible across your entire tactical stack. Control your mission from a **Raspberry Pi TFT**, a **Workstation**, or a **Mobile Device** with real-time synchronization.
 
 <p align="center">
   <img src="assets/attack.png" width="90%" alt="Desktop Dashboard View">
   <br>
-  <i>PC-based dashboard view showing the advanced attack control center and real-time statistics.</i>
+  <i>Synchronized operational dashboard demonstrating real-time attack telemetry and node management.</i>
 </p>
 
 ---
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Platform: Raspberry Pi](https://img.shields.io/badge/Platform-Raspberry%20Pi-red.svg)](https://www.raspberrypi.org/)
-[![Python: 3.8+](https://img.shields.io/badge/Python-3.8%2B-green.svg)](https://www.python.org/)
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+  <a href="https://www.raspberrypi.org/"><img src="https://img.shields.io/badge/Platform-Raspberry%20Pi-red.svg" alt="Platform: Raspberry Pi"></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.8%2B-green.svg" alt="Python: 3.8+"></a>
+</p>
 
-**VoidPWN** is a comprehensive, automated network security assessment platform designed for the Raspberry Pi. It provides a centralized web-based dashboard (HUD) for managing complex penetration testing operations, including network reconnaissance, wireless auditing, and automated attack scenarios—all through an intuitive interface optimized for portable deployment.
+**VoidPWN** is an automated network security assessment framework engineered for portability and field efficiency. It consolidates industry-standard security tools into a unified, web-based Command & Control (C2) interface, enabling operators to execute complex network discovery, wireless auditing, and automated exploitation scenarios with precision.
 
 ---
 
 ## 📸 Technical Interface Tour
 
-### 1. Network Discovery & Reconnaissance
-The reconnaissance module integrates **Nmap** for rapid host discovery and service enumeration. It allows for stealthy network mapping and vulnerability assessment directly from the field.
+### 🛡️ Network Intel & Reconnaissance
+Deploy sophisticated **Nmap** profiles for rapid host discovery, service enumeration, and vulnerability mapping. Built-in OS fingerprinting and port discovery provide immediate situational awareness.
 <p align="center">
-  <img src="assets/Net-Discovery.jpeg" width="80%" alt="Network Recon">
+  <img src="assets/Net-Discovery.jpeg" width="85%" alt="Network Recon">
 </p>
 
-### 2. Wireless Auditing & Attack Vectors
-Access a comprehensive suite of wireless tools. This section manages **Handshake capture**, **Deauthentication attacks**, and **WPA/WPA2 auditing** with a few clicks, eliminating complex CLI commands.
+### 📡 Wireless Attack Arsenal
+Execute advanced wireless vectors including **WPA/WPA2 Handshake capture**, **PMKID extraction**, **Evil Twin** deployment, and **MDK4-based stress testing**—all through a tactical, streamlined workflow.
 <p align="center">
-  <img src="assets/Wifi-Attacks.jpeg" width="80%" alt="Wireless Attacks">
+  <img src="assets/Wifi-Attacks.jpeg" width="85%" alt="Wireless Attacks">
 </p>
 
-### 3. Real-Time Operational Logging
-The **Live HUD** provides a top-to-bottom terminal-like experience for monitoring active missions. All operations are logged and can be downloaded as detailed reports for post-mission analysis.
+### 📊 Tactical Data & Live Logging
+Monitor every phase of the operation through the **Live HUD**, featuring terminal-synchronized log streaming. Post-mission analysis is simplified through comprehensive, downloadable session reports.
 <p align="center">
-  <img src="assets/Report&Logging.jpeg" width="80%" alt="Operational Logs">
+  <img src="assets/Report&Logging.jpeg" width="85%" alt="Operational Logs">
 </p>
 
-### 4. Modular Dashboard Navigation
-The interface is built with modularity in mind, allowing the operator to quickly switch between network discovery, settings, wireless attacks, and system reports through a clean, tactical menu.
+### ⚙️ Modular Operation Management
+The intuitive HUD allows seamless switching between reconnaissance, active attacks, system configuration, and data management, ensuring the operator remains focused on the mission objective.
 <p align="center">
-  <img src="assets/Choose-Interface.jpeg" width="80%" alt="Dashboard Menu">
+  <img src="assets/Choose-Interface.jpeg" width="85%" alt="Dashboard Menu">
 </p>
 
 ---
 
-## 🎯 Key Features
+## 🛠️ Operational Capabilities
 
-### 🌐 Network Reconnaissance
-- **Nmap Integration**: Quick, full, stealth, and vulnerability scans
-- **Port Discovery**: Comprehensive service enumeration
-- **OS Fingerprinting**: Automated operating system detection
-- **Web Directory Fuzzing**: GoBuster integration for web application discovery
+### 🔍 Intelligence & Recon
+*   **Packet Analysis**: Automated service discovery and OS identification.
+*   **Vulnerability Scanning**: Targeted Nmap scripts for rapid surface analysis.
+*   **Web Fuzzing**: Integrated GoBuster for directory and asset discovery.
 
-### 📡 Wireless Security Assessment
-- **WPA/WPA2 Attacks**: Handshake capture, PMKID extraction, Evil Twin
-- **Deauthentication**: Aggressive client disconnection with channel locking
-- **WPS Exploitation**: Pixie Dust and Reaver-based PIN recovery
-- **MDK4 Stress Testing**: Beacon flooding and authentication attacks
-- **Wifite Integration**: Automated wireless network auditing
+### 📶 Wireless Dominance
+*   **Automated Auditing**: Wifite integration for high-success wireless penetration.
+*   **Protocol Exploitation**: WPA/WPS attack vectors and deauthentication channel locking.
+*   **Signal Analysis**: Real-time signal strength and target metadata tracking.
 
-### 🤖 Automated Scenarios
-- **Quick Check**: 5-minute rapid network assessment
-- **Stealth Recon**: Low-profile network scanning with decoys
-- **Web Application Audit**: Automated web vulnerability discovery
-- **Wireless Audit**: Complete WiFi penetration testing workflow
+### 🤖 Scenario Automation
+*   **Rapid Assessment**: 5-minute pre-configured network check.
+*   **Stealth Recon**: Low-profile scanning utilizing decoy traffic.
+*   **Full Wireless Audit**: End-to-end automated WiFi penetration workflow.
 
-### 📊 Operational Dashboard
-- **Live HUD**: Real-time attack monitoring and log streaming
-- **Device Inventory**: Automatic target tracking and metadata management
-- **Report System**: Comprehensive operation logs with download capability
-- **Stop All Attacks**: Global kill switch for active operations
-- **Display Management**: TFT/HDMI switching for portable deployment
+### 🖥️ Operator Interface
+*   **Live HUD**: Sub-second latency attack monitoring and log visualization.
+*   **C2 Dashboard**: Global "Stop All" kill-switch and device inventory management.
+*   **Display Logic**: Seamless SPI TFT and HDMI output switching.
 
 ---
 
-## 🛠️ Hardware Requirements
+## 📦 Hardware & Deployment
 
-### Recommended Configuration
+### Recommended Build
+| Component | Specification | Description |
+| :--- | :--- | :--- |
+| **Processor** | Raspberry Pi 4B (4GB+) | Core computational unit for concurrent scanning. |
+| **Radio** | Alfa AWUS036ACH | Dual-band support with RTL8812AU injection. |
+| **Display** | Waveshare 3.5" TFT | Local field monitoring and touch-enabled HUD. |
+| **Storage** | 32GB+ UHS-I microSD | High-speed logging and handshake storage. |
 
-#### Core Hardware
-- **Raspberry Pi 4 Model B** (4GB+ RAM recommended)
-  - ARM Cortex-A72 quad-core processor
-  - Dual-band WiFi (2.4GHz/5GHz) for management interface
-  - Gigabit Ethernet for wired network access
-
-#### Display
-- **Waveshare 3.5" TFT LCD** (480x320 resolution)
-  - SPI interface for low-latency rendering
-  - Touch-enabled for field operations
-  - HDMI output also supported for desktop use
-
-#### Wireless Adapter
-- **Alfa AWUS036ACH** (or compatible)
-  - Realtek RTL8812AU chipset
-  - Monitor mode and packet injection support
-  - Dual-band (2.4GHz/5GHz) operation
-  - High-gain external antenna
-
-#### Storage
-- **32GB+ microSD Card** (Class 10 or UHS-I)
-  - Fast read/write for log storage
-  - Sufficient space for captured handshakes and reports
-
-#### Power Supply
-- **Official Raspberry Pi 4 Power Supply** (5V/3A USB-C)
-  - Stable power delivery for sustained operations
-  - Portable battery pack compatible (15W minimum)
-
-### Alternative Hardware
-- **Raspberry Pi 3B+**: Supported but slower performance
-- **Other WiFi Adapters**: Any adapter with monitor mode support (e.g., Alfa AWUS036NHA, TP-Link TL-WN722N v1)
-- **HDMI Display**: Any HDMI monitor can replace the TFT screen
-
----
-
-## 📦 Installation
-
-### Prerequisites
-- Raspberry Pi OS (Kali Linux ARM recommended for pre-installed tools)
-- Python 3.8 or higher
-- Root/sudo access
-
-### Quick Start
-
-#### 1. Clone Repository
-```bash
-git clone https://github.com/void0x11/VoidPWN.git
-cd VoidPWN
-```
-
-#### 2. Install Dependencies
-```bash
-# Core security tools (aircrack-ng, nmap, reaver, etc.)
-sudo ./scripts/core/setup.sh
-
-# Optional: Install TFT LCD drivers (run LAST, will reboot)
-sudo ./scripts/core/install_lcd.sh
-```
-
-#### 3. Launch Dashboard
-```bash
-cd dashboard
-sudo python3 server.py
-```
-
-#### 4. Access Web Interface
-Open a browser and navigate to:
-```
-http://<RASPBERRY_PI_IP>:5000
-```
+### Quick Installation
+1. **Initialize Environment**: Clone the repository and navigate to the project root.
+   ```bash
+   git clone https://github.com/void0x11/VoidPWN.git && cd VoidPWN
+   ```
+2. **Setup Dependencies**: Install the core security engine and optional TFT drivers.
+   ```bash
+   sudo ./scripts/core/setup.sh
+   sudo ./scripts/core/install_lcd.sh # Optional: Reboot required
+   ```
+3. **Launch HUD**: Execute the C2 server with root privileges.
+   ```bash
+   cd dashboard && sudo python3 server.py
+   ```
 
 ---
 
 ## 📚 Documentation
 
 ### User Guides
-- **[User Guide](./USER_GUIDE.md)**: Complete operational manual with tutorials
-- **[Hardware Setup](./docs/HARDWARE_SETUP.md)**: Detailed hardware assembly and configuration
+- **[Operation Manual](./USER_GUIDE.md)**: Full field guide for security operators.
+- **[Hardware Setup](./docs/HARDWARE_SETUP.md)**: Detailed hardware assembly and configuration.
 
 ### Feature Documentation
-- **[Feature Guide](./docs/FEATURE_GUIDE.md)**: Comprehensive explanation of every feature
-- **[WiFi Arsenal](./docs/WIFI_ARSENAL.md)**: Wireless attack methodologies
-- **[Network Intel](./docs/NETWORK_INTEL.md)**: Reconnaissance techniques
-- **[Scenario Guide](./docs/SCENARIO_GUIDE.md)**: Automated workflow documentation
+- **[Feature Catalog](./docs/FEATURE_GUIDE.md)**: In-depth technical breakdown of every module.
+- **[WiFi Methodologies](./docs/WIFI_ARSENAL.md)** / **[Recon Techniques](./docs/NETWORK_INTEL.md)**.
+- **[Scenario Guide](./docs/SCENARIO_GUIDE.md)**: Automated workflow documentation.
 
 ### Technical Reference
-- **[API Reference](./docs/API_REFERENCE.md)**: REST API endpoints and schemas
-- **[Technical Reference](./docs/TECHNICAL_REFERENCE.md)**: Architecture and internals
-- **[Attack Reference](./docs/ATTACK_REFERENCE.md)**: Complete attack vector catalog
+- **[API Reference](./docs/API_REFERENCE.md)**: REST API endpoints and schemas.
+- **[Architecture & API](./docs/TECHNICAL_REFERENCE.md)**: System internals and REST interface.
+- **[Attack Reference](./docs/ATTACK_REFERENCE.md)**: Complete attack vector catalog.
 
 ### Development
-- **[Development Guide](./docs/DEVELOPMENT.md)**: Contributing and extending VoidPWN
+- **[Development Guide](./docs/DEVELOPMENT.md)**: Contributing and extending VoidPWN.
 
 ---
 
@@ -197,51 +141,42 @@ http://<RASPBERRY_PI_IP>:5000
 
 ### Running a WiFi Handshake Capture
 
-1. **Navigate to WiFi Attacks tab**
-2. **Click "REFRESH NETWORKS"** to scan for access points
-3. **Select target network** from the list
-4. **Click "HANDSHAKE"** to initiate capture
-5. **Monitor progress** in the Live HUD
-6. **View results** in the Reports tab
+1. **Navigate to WiFi Attacks tab**.
+2. **Click "REFRESH NETWORKS"** to scan for access points.
+3. **Select target network** from the list.
+4. **Click "HANDSHAKE"** to initiate capture.
+5. **Monitor progress** in the Live HUD.
+6. **View results** in the Reports tab.
 
 ---
 
-## 🔒 Legal Disclaimer
-
-**VoidPWN is intended for authorized security research and ethical penetration testing only.**
-
-- Only use on networks you own or have explicit written permission to test
-- Unauthorized access to computer networks is illegal in most jurisdictions
-- The developers assume no liability for misuse of this software
+## 🔒 Legal & Ethical Compliance
+**VoidPWN is an authorized security research platform.** Use is permitted only on infrastructure where the operator has explicit, written authorization. All data gathered must be handled according to local data protection laws. The developers assume no liability for unauthorized or misuse of this software.
 
 ---
 
 ## 🤝 Contributing
-
 Contributions are welcome! Please see [DEVELOPMENT.md](./docs/DEVELOPMENT.md) for guidelines.
 
 ---
 
 ## 📄 License
-
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 👤 Author
-
-**void0x11** - [GitHub](https://github.com/void0x11)
+## 👤 Maintainer
+**void0x11** - [GitHub Profile](https://github.com/void0x11) | Developed for Advanced Security Auditing.
 
 ---
 
 ## 🙏 Acknowledgments
-
-- **Aircrack-ng Suite**: Wireless security assessment tools
-- **Nmap Project**: Network discovery and security auditing
-- **Reaver/Pixiewps**: WPS vulnerability research
-- **Wifite**: Automated wireless auditing framework
-- **Flask**: Python web framework
-- **Raspberry Pi Foundation**: Affordable computing platform
+- **Aircrack-ng Suite**: Wireless security assessment tools.
+- **Nmap Project**: Network discovery and security auditing.
+- **Reaver/Pixiewps**: WPS vulnerability research.
+- **Wifite**: Automated wireless auditing framework.
+- **Flask**: Python web framework.
+- **Raspberry Pi Foundation**: Affordable computing platform.
 
 ---
 
