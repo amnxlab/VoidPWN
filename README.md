@@ -27,9 +27,21 @@
 
 ---
 
-<p align="center">
-  <img src="assets/wifi-attacks.jpg" width="800" alt="VoidPWN Hardware Controller">
-</p>
+## 🏗️ System Architecture
+```mermaid
+graph TD
+    User((Operator)) -->|HTTPS/Web| C2[Flask C2 Server]
+    subgraph "VoidPWN Logic Engine"
+        C2 -->|Subprocess| RECON[Network Recon Engine]
+        C2 -->|Subprocess| WIFI[Wireless Breach Suite]
+        C2 -->|IO Stream| HUD[Live HUD Streaming]
+    end
+    subgraph "Hardware Layer"
+        RECON -->|Nmap/Scanner| ETH[Ethernet/Interface]
+        WIFI -->|Aircrack/Wifite| RF[RF Monitor Mode]
+        TFT[Waveshare 3.5' TFT] -->|SPI| C2
+    end
+```
 
 ---
 
@@ -65,6 +77,22 @@ Monitor every phase of the operation through the **Live HUD**, featuring termina
 *   **📶 SIGNAL_DOMINANCE**: WPA/WPA2 protocol audit & handshake exfiltration.
 *   **🤖 SCENARIO_EXEC**: Pre-configured breach sequences for rapid deployment.
 *   **🖥️ C2_DASHBOARD**: Real-time telemetry & remote mission control.
+
+---
+
+## 🔬 Tactical Methodology
+
+### [ // RECON_LOGIC ]
+VoidPWN utilizes optimized **Nmap T4/T5** profiles for rapid perimeter assessment. Scan phases include:
+1. **Host Discovery**: ARP/ICMP sweeps.
+2. **Service Enumeration**: Version detection (-sV) and OS fingerprinting (-O).
+3. **Vulnerability Mapping**: Targeted NSE script execution for common CVEs.
+
+### [ // WIRELESS_BREACH_LOGIC ]
+The wireless engine automates the 802.11 attack lifecycle:
+*   **WPA/WPA2**: Automated deauthentication for handshake capture & PMKID extraction.
+*   **Evil Twin**: DNS-spoofing and captive portal hosting via `hostapd` management.
+*   **Protocol Hardening**: Integrated MDK4 for testing AP resilience against flood attacks.
 
 ---
 
@@ -175,6 +203,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Wifite**: Automated wireless auditing framework.
 - **Flask**: Python web framework.
 - **Raspberry Pi Foundation**: Affordable computing platform.
+
+---
+
+## 🗺️ Future Operations (Roadmap)
+- [ ] **Neural-Recon**: AI-driven log summarization and attack vector suggestion.
+- [ ] **Distributed Breach**: Multi-node coordination for large-scale operations.
+- [ ] **RF-SDR Integration**: Expansion into Sub-GHz and cellular signal analysis.
+- [ ] **Stealth Protocol V2**: Advanced VPN/Tor tunneling for C2 exfiltration.
 
 ---
 
