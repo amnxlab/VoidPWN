@@ -2,9 +2,16 @@
   <img src="assets/Gemini_Generated_Image_ubqnxrubqnxrubqn.png" width="100%" alt="VoidPWN Logo">
 </p>
 
+---
+
+# VoidPWN: Automated Penetration Testing Platform
+## Comprehensive Penetration Testing Platform for Raspberry Pi
+> *Empowering security research with professional auditing tools and an intuitive dashboard.*
+
+---
+
 <p align="center">
-  <b>Comprehensive Penetration Testing Platform for Raspberry Pi</b><br>
-  <i>Empowering security research with professional auditing tools and an intuitive dashboard.</i>
+  <img src="assets/Pi-Isometric.png" width="800" alt="VoidPWN Hardware Controller">
 </p>
 
 ---
@@ -16,12 +23,6 @@ VoidPWN is designed for flexibility. The dashboard is a responsive web applicati
   <img src="assets/attack.png" width="90%" alt="Desktop Dashboard View">
   <br>
   <i>PC-based dashboard view showing the advanced attack control center and real-time statistics.</i>
-</p>
-
----
-
-<p align="center">
-  <img src="assets/Pi-Isometric.png" width="800" alt="VoidPWN Hardware Controller">
 </p>
 
 ---
