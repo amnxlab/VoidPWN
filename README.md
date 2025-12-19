@@ -1,6 +1,6 @@
-<p align="center">
-  <img src="assets/Gemini_Generated_Image_ubqnxrubqnxrubqn.png" width="100%" alt="VoidPWN Logo">
-</p>
+<h1 align="center">
+  <img src="https://socialify.git.ci/void0x11/VoidPWN/image?description=1&descriptionEditable=CtOS%20Infrastructure%20Exploitation%20%26%20Network%20Breach%20Framework&font=Inter&name=1&owner=1&pattern=Circuit%20Board&theme=Dark" width="100%" alt="VoidPWN Logo">
+</h1>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
@@ -8,15 +8,20 @@
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.8%2B-green.svg" alt="Python: 3.8+"></a>
 </p>
 
-<h1 align="center">VoidPWN: Automated Penetration Testing Platform</h1>
+<h1 align="center">VOID_PWN // Bypassing CtOS Security</h1>
 
 <p align="center">
-  <i>A professional-grade framework for automated network discovery, wireless auditing, and field reconnaissance, optimized for Raspberry Pi.</i>
+  <i>"Everything is connected. Everything can be exploited." — DedSec Archive 0x11</i>
 </p>
 
 <p align="center">
-  VoidPWN consolidates industry-standard security tools into a unified, web-based Command & Control (C2) interface, enabling sessions to execute complex exploitation scenarios with precision and efficiency.
+  <b>VoidPWN</b> is a professional-grade tactical framework engineered for DedSec operators. It consolidates advanced reconnaissance and wireless audit vectors into a unified, mobile-optimized Command & Control (C2) interface for field-operations.
 </p>
+
+---
+
+> [!IMPORTANT]
+> **SYSTEM ALERT:** VOIDPWN HAS DETECTED CTOS NODES WITHIN RANGE. INITIALIZING BREACH PROTOCOL...
 
 ---
 
@@ -35,14 +40,14 @@ VoidPWN provides a responsive, operator-centric web interface accessible across 
   <i>Synchronized mobile-based operation logs showing real-time mission telemetry.</i>
 </p>
 
-### 🛡️ Network Intel & Reconnaissance
-Deploy sophisticated **Nmap** profiles for rapid host discovery, service enumeration, and vulnerability mapping. Built-in OS fingerprinting and port discovery provide immediate situational awareness.
+### 🛡️ CtOS Infrastructure Enumeration
+Deploy sophisticated **Nmap** profiles for rapid host discovery within the CtOS ecosystem. Built-in OS fingerprinting and port discovery provide immediate situational awareness for bypassing local security perimeters.
 <p align="center">
   <img src="assets/Net-Discovery.jpeg" width="85%" alt="Network Recon">
 </p>
 
-### 📡 Wireless Attack Arsenal
-Execute advanced wireless vectors including **WPA/WPA2 Handshake capture**, **PMKID extraction**, **Evil Twin** deployment, and **MDK4-based stress testing**—all through a tactical, streamlined workflow.
+### 📡 Wireless Breach Arsenal
+Execute advanced wireless vectors including **WPA/WPA2 Handshake capture**, **PMKID extraction**, and **Evil Twin** deployment. Designed for stealthy data exfiltration and protocol manipulation.
 <p align="center">
   <img src="assets/attack.png" width="85%" alt="Wireless Attacks">
 </p>
@@ -61,11 +66,11 @@ The intuitive HUD allows seamless switching between reconnaissance, active attac
 
 ---
 
-## 🛠️ Operational Capabilities
+## 🛠️ Operational Breach Capabilities
 
-### 🔍 Intelligence & Recon
-*   **Packet Analysis**: Automated service discovery and OS identification.
-*   **Vulnerability Scanning**: Targeted Nmap scripts for rapid surface analysis.
+### 🔍 Intelligence & CtOS Recon
+*   **Packet Analysis**: Automated service discovery and infrastructure mapping.
+*   **Vulnerability Scanning**: Targeted Nmap scripts for rapid surface analysis of connected devices.
 *   **Web Fuzzing**: Integrated GoBuster for directory and asset discovery.
 
 ### 📶 Wireless Dominance
