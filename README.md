@@ -98,15 +98,15 @@ sequenceDiagram
 
 ## 🔬 Under the Hood: The Engineering Logic
 
-### ⚡ C2 Orchestration
+### C2 Orchestration
 VoidPWN uses a **Threaded Producer-Consumer** pattern for process management. Using `stdbuf -oL`, we force binaries like `nmap` and `airodump-ng` to give up their memory buffers, allowing for **millisecond-latency HUD updates** instead of waiting for process completion.
 
-### 🔍 Real-time Intel Extraction
+### Real-time Intel Extraction
 The system doesn't just display logs; it audits them. Every line of output is passed through a **Regex Heuristic Engine** (`parse_inventory_info`) that identifies:
 - **Nmap Artifacts**: Auto-populating the target inventory from active scans.
 - **Mac/BSSID Signatures**: Tracking devices in the physical vicinity.
 
-### 📺 Hardware Abstraction
+### Hardware Abstraction
 The display engine switches between the standard HDMI framebuffer and the SPI-based TFT framebuffer by modifying the `/boot/config.txt` and re-initializing the `fbcp` (framebuffer copy) service. This allows for seamless transitions between "Field Mode" (TFT) and "Base Mode" (HDMI/Desktop).
 
 ---
@@ -138,23 +138,23 @@ Monitor every phase of the operation through the **Live HUD**, featuring termina
   <img src="assets/Report&Logging.jpeg" width="85%" alt="Operational Logs">
 </p>
 
-### [ // OPERATIONAL_MODALITY ]
-*   **🔍 CtOS_RECON**: Automated infrastructure mapping & OS fingerprinting.
-*   **📶 SIGNAL_DOMINANCE**: WPA/WPA2 protocol audit & handshake exfiltration.
-*   **🤖 SCENARIO_EXEC**: Pre-configured breach sequences for rapid deployment.
-*   **🖥️ C2_DASHBOARD**: Real-time telemetry & remote mission control.
+### [ OPERATIONAL_MODALITY ]
+*   **CtOS_RECON**: Automated infrastructure mapping & OS fingerprinting.
+*   **SIGNAL_DOMINANCE**: WPA/WPA2 protocol audit & handshake exfiltration.
+*   **CENARIO_EXEC**: Pre-configured breach sequences for rapid deployment.
+*   **C2_DASHBOARD**: Real-time telemetry & remote mission control.
 
 ---
 
 ## 🔬 Tactical Methodology
 
-### [ // RECON_LOGIC ]
+### [ RECON_LOGIC ]
 VoidPWN utilizes optimized **Nmap T4/T5** profiles for rapid perimeter assessment. Scan phases include:
 1. **Host Discovery**: ARP/ICMP sweeps.
 2. **Service Enumeration**: Version detection (-sV) and OS fingerprinting (-O).
 3. **Vulnerability Mapping**: Targeted NSE script execution for common CVEs.
 
-### [ // WIRELESS_BREACH_LOGIC ]
+### [ WIRELESS_BREACH_LOGIC ]
 The wireless engine automates the 802.11 attack lifecycle:
 *   **WPA/WPA2**: Automated deauthentication for handshake capture & PMKID extraction.
 *   **Evil Twin**: DNS-spoofing and captive portal hosting via `hostapd` management.
@@ -164,29 +164,29 @@ The wireless engine automates the 802.11 attack lifecycle:
 
 ## 🛠️ Operational Breach Capabilities
 
-### 🔍 Intelligence & CtOS Recon
+### Intelligence & CtOS Recon
 *   **Packet Analysis**: Automated service discovery and infrastructure mapping.
 *   **Vulnerability Scanning**: Targeted Nmap scripts for rapid surface analysis of connected devices.
 *   **Web Fuzzing**: Integrated GoBuster for directory and asset discovery.
 
-### 📶 Wireless Dominance
+### Wireless Dominance
 *   **Automated Auditing**: Wifite integration for high-success wireless penetration.
 *   **Protocol Exploitation**: WPA/WPS attack vectors and deauthentication channel locking.
 *   **Signal Analysis**: Real-time signal strength and target metadata tracking.
 
-### 🤖 Scenario Automation
+### Scenario Automation
 *   **Rapid Assessment**: 5-minute pre-configured network check.
 *   **Stealth Recon**: Low-profile scanning utilizing decoy traffic.
 *   **Full Wireless Audit**: End-to-end automated WiFi penetration workflow.
 
-### 🖥️ Operator Interface
+### Operator Interface
 *   **Live HUD**: Sub-second latency attack monitoring and log visualization.
 *   **C2 Dashboard**: Global "Stop All" kill-switch and device inventory management.
 *   **Display Logic**: Seamless SPI TFT and HDMI output switching.
 
 ---
 
-## 📦 Hardware & Deployment
+## Hardware & Deployment
 
 ### Recommended Build
 | Component | Specification | Description |
@@ -196,7 +196,7 @@ The wireless engine automates the 802.11 attack lifecycle:
 | **Display** | Waveshare 3.5" TFT | Local field monitoring and touch-enabled HUD. |
 | **Storage** | 32GB+ UHS-I microSD | High-speed logging and handshake storage. |
 
-### [ // INITIALIZING_BREACH ]
+### [ INITIALIZING_BREACH ]
 
 1. **DOWNLOAD_CORE**:
    ```bash
@@ -234,7 +234,7 @@ The wireless engine automates the 802.11 attack lifecycle:
 
 ---
 
-## 🚀 Quick Example
+## Quick Example
 
 ### Running a WiFi Handshake Capture
 
@@ -247,22 +247,22 @@ The wireless engine automates the 802.11 attack lifecycle:
 
 ---
 
-## 🔒 Legal & Ethical Compliance
+## Legal & Ethical Compliance
 **VoidPWN is an authorized security research platform.** Use is permitted only on infrastructure where the operator has explicit, written authorization. All data gathered must be handled according to local data protection laws. The developers assume no liability for unauthorized or misuse of this software.
 
 ---
 
-## 📄 License
+## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 👤 Maintainer
+## Maintainer
 **void0x11** - [GitHub Profile](https://github.com/void0x11) | Developed for Advanced Security Auditing.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 - **Aircrack-ng Suite**: Wireless security assessment tools.
 - **Nmap Project**: Network discovery and security auditing.
 - **Reaver/Pixiewps**: WPS vulnerability research.
@@ -272,7 +272,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🗺️ Future Operations (Roadmap)
+## Future Operations (Roadmap)
 - [ ] **Neural-Recon**: AI-driven log summarization and attack vector suggestion.
 - [ ] **Distributed Breach**: Multi-node coordination for large-scale operations.
 - [ ] **RF-SDR Integration**: Expansion into Sub-GHz and cellular signal analysis.
