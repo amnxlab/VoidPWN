@@ -2,6 +2,16 @@
   <img src="assets/Gemini_Generated_Image_ubqnxrubqnxrubqn.png" width="100%" alt="VoidPWN Logo">
 </p>
 
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+  <a href="https://www.raspberrypi.org/"><img src="https://img.shields.io/badge/Platform-Raspberry%20Pi-red.svg" alt="Platform: Raspberry Pi"></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.8%2B-green.svg" alt="Python: 3.8+"></a>
+</p>
+
+<p align="center">
+  <b>VoidPWN</b> is an automated network security assessment framework engineered for portability and field efficiency. It consolidates industry-standard security tools into a unified, web-based Command & Control (C2) interface, enabling operators to execute complex network discovery, wireless auditing, and automated exploitation scenarios with precision.
+</p>
+
 ---
 
 # VoidPWN: Automated Penetration Testing Platform
@@ -26,18 +36,6 @@ VoidPWN provides a responsive, operator-centric web interface accessible across 
 </p>
 
 ---
-
-<p align="center">
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
-  <a href="https://www.raspberrypi.org/"><img src="https://img.shields.io/badge/Platform-Raspberry%20Pi-red.svg" alt="Platform: Raspberry Pi"></a>
-  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.8%2B-green.svg" alt="Python: 3.8+"></a>
-</p>
-
-**VoidPWN** is an automated network security assessment framework engineered for portability and field efficiency. It consolidates industry-standard security tools into a unified, web-based Command & Control (C2) interface, enabling operators to execute complex network discovery, wireless auditing, and automated exploitation scenarios with precision.
-
----
-
-## 📸 Technical Interface Tour
 
 ### 🛡️ Network Intel & Reconnaissance
 Deploy sophisticated **Nmap** profiles for rapid host discovery, service enumeration, and vulnerability mapping. Built-in OS fingerprinting and port discovery provide immediate situational awareness.
