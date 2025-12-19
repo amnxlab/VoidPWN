@@ -632,17 +632,19 @@ def action_switch_tft():
 
 @app.route('/api/action/hdmi', methods=['POST'])
 def action_switch_hdmi():
-    """Stop all active attacks and scans"""
-    global SCAN_RUNNING
+    """Switch to HDMI output"""
     try:
-        # Kill common attack tools
-        tools = ['aireplay-ng', 'airodump-ng', 'airbase-ng', 'wifite', 'bettercap', 'hcxdumptool', 'mdk4', 'nmap', 'reaver', 'bully']
-        for tool in tools:
-            subprocess.run(['sudo', 'killall', tool], stderr=subprocess.DEVNULL)
-            
-        SCAN_RUNNING = False
-        add_live_log("🛑 STOPPED ALL ATTACKS", "error")
-        return jsonify({'status': 'success', 'message': 'All active attacks stopped.'})
+        cmd = f"sudo {VOIDPWN_DIR}/scripts/core/restore_hdmi.sh"
+        subprocess.Popen(cmd, shell=True)
+        
+        reporter.add_report(
+            "SYSTEM", 
+            "Display", 
+            "Rebooting", 
+            "Switching to HDMI output"
+        )
+        
+        return jsonify({'status': 'success', 'message': 'Switching to HDMI & Rebooting...'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

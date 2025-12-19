@@ -42,11 +42,8 @@ cat << "EOF"
 EOF
 echo -e "${NC}"
 
-read -p "Continue with LCD installation? (y/n): " confirm
-if [[ "$confirm" != "y" ]]; then
-    log_warning "Installation cancelled"
-    exit 0
-fi
+# Auto-proceed (no user confirmation needed when called from dashboard)
+log_info "Proceeding with LCD installation..."
 
 # Install LCD drivers
 log_info "Installing LCD drivers..."

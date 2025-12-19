@@ -69,7 +69,7 @@ header {
     background: var(--panel-bg);
     backdrop-filter: var(--glass);
     border-bottom: 1px solid var(--border);
-    padding: 5px 10px;
+    padding: 3px 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -79,8 +79,8 @@ header {
 .logo {
     font-family: var(--font-mono);
     font-weight: 700;
-    font-size: 1.2rem;
-    letter-spacing: 2px;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
     color: var(--primary);
     text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
 }
@@ -91,8 +91,8 @@ header {
 
 .system-stats {
     display: flex;
-    gap: 15px;
-    font-size: 0.8rem;
+    gap: 10px;
+    font-size: 0.65rem;
     font-family: var(--font-mono);
 }
 
@@ -200,7 +200,7 @@ main {
 }
 
 .hud-footer {
-    height: 250px;
+    height: 33vh;
     background: var(--panel-bg);
     border-top: 1px solid var(--border);
     padding: 5px 10px;
@@ -215,14 +215,35 @@ main {
     display: block;
 }
 
+/* Reports page: full width, no sidebar */
+body.reports-active main {
+    grid-template-columns: 1fr;
+}
+
+body.reports-active .sidebar {
+    display: none;
+}
+
+#tab-reports table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+#tab-reports th,
+#tab-reports td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* Panels */
 .panel {
     background: var(--panel-bg);
     backdrop-filter: var(--glass);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 20px;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
     position: relative;
     overflow: hidden;
 }
@@ -241,18 +262,18 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 h2 {
     font-family: var(--font-mono);
-    font-size: 1rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--primary);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 /* Sidebar / Device Inventory */
@@ -349,10 +370,10 @@ h2 {
     background: rgba(0, 243, 255, 0.1);
     border: 1px solid var(--primary);
     color: var(--primary);
-    padding: 10px 20px;
-    border-radius: 6px;
+    padding: 6px 12px;
+    border-radius: 4px;
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: 0.65rem;
     cursor: pointer;
     transition: 0.3s;
     text-transform: uppercase;

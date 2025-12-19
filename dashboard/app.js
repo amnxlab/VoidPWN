@@ -59,6 +59,9 @@ function switchTab(tabId) {
         c.classList.toggle('active', c.id === `tab-${tabId}`);
     });
 
+    // Toggle body class for reports page (hides sidebar)
+    document.body.classList.toggle('reports-active', tabId === 'reports');
+
     if (tabId === 'reports') loadReports();
 }
 
