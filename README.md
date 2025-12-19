@@ -1,11 +1,24 @@
 <p align="center">
-  <img src="assets/Gemini_Generated_Image_ubqnxrubqnxrubqn.png" width="600" alt="VoidPWN Logo">
+  <img src="assets/Gemini_Generated_Image_ubqnxrubqnxrubqn.png" width="100%" alt="VoidPWN Logo">
 </p>
 
 <p align="center">
   <b>Comprehensive Penetration Testing Platform for Raspberry Pi</b><br>
   <i>Empowering security research with professional auditing tools and an intuitive dashboard.</i>
 </p>
+
+---
+
+## 💻 Cross-Platform Operational HUD
+VoidPWN is designed for flexibility. The dashboard is a responsive web application that can be accessed across multiple devices simultaneously. Whether you are using the built-in **Raspberry Pi TFT display**, a **PC/Laptop**, or your **Smartphone**, you get the same powerful interface.
+
+<p align="center">
+  <img src="assets/attack.png" width="90%" alt="Desktop Dashboard View">
+  <br>
+  <i>PC-based dashboard view showing the advanced attack control center and real-time statistics.</i>
+</p>
+
+---
 
 <p align="center">
   <img src="assets/Pi-Isometric.png" width="800" alt="VoidPWN Hardware Controller">
@@ -21,16 +34,33 @@
 
 ---
 
-## 📸 Interface Tour
+## 📸 Technical Interface Tour
 
+### 1. Network Discovery & Reconnaissance
+The reconnaissance module integrates **Nmap** for rapid host discovery and service enumeration. It allows for stealthy network mapping and vulnerability assessment directly from the field.
 <p align="center">
-  <img src="assets/Net-Discovery.jpeg" width="45%" alt="Network Recon">
-  <img src="assets/Wifi-Attacks.jpeg" width="45%" alt="Wireless Attacks">
+  <img src="assets/Net-Discovery.jpeg" width="80%" alt="Network Recon">
 </p>
+
+### 2. Wireless Auditing & Attack Vectors
+Access a comprehensive suite of wireless tools. This section manages **Handshake capture**, **Deauthentication attacks**, and **WPA/WPA2 auditing** with a few clicks, eliminating complex CLI commands.
 <p align="center">
-  <img src="assets/Report&Logging.jpeg" width="45%" alt="Operational Logs">
-  <img src="assets/Choose-Interface.jpeg" width="45%" alt="Dashboard Menu">
+  <img src="assets/Wifi-Attacks.jpeg" width="80%" alt="Wireless Attacks">
 </p>
+
+### 3. Real-Time Operational Logging
+The **Live HUD** provides a top-to-bottom terminal-like experience for monitoring active missions. All operations are logged and can be downloaded as detailed reports for post-mission analysis.
+<p align="center">
+  <img src="assets/Report&Logging.jpeg" width="80%" alt="Operational Logs">
+</p>
+
+### 4. Modular Dashboard Navigation
+The interface is built with modularity in mind, allowing the operator to quickly switch between network discovery, settings, wireless attacks, and system reports through a clean, tactical menu.
+<p align="center">
+  <img src="assets/Choose-Interface.jpeg" width="80%" alt="Dashboard Menu">
+</p>
+
+---
 
 ## 🎯 Key Features
 
