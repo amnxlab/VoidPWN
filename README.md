@@ -21,7 +21,7 @@
 ---
 
 <p align="center">
-  <img src="assets/Pi-Isometric.png" width="800" alt="VoidPWN Hardware Controller">
+  <img src="assets/Pi-Isometric.jpg" width="800" alt="VoidPWN Hardware Controller">
 </p>
 
 ---
@@ -44,7 +44,7 @@ Deploy sophisticated **Nmap** profiles for rapid host discovery, service enumera
 ### 📡 Wireless Attack Arsenal
 Execute advanced wireless vectors including **WPA/WPA2 Handshake capture**, **PMKID extraction**, **Evil Twin** deployment, and **MDK4-based stress testing**—all through a tactical, streamlined workflow.
 <p align="center">
-  <img src="assets/Wifi-Attacks.jpeg" width="85%" alt="Wireless Attacks">
+  <img src="assets/wifi-attacks.jpg" width="85%" alt="Wireless Attacks">
 </p>
 
 ### 📊 Tactical Data & Live Logging
