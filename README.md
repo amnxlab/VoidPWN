@@ -24,16 +24,6 @@
   <b>VoidPWN</b> is a high-latency, mobile-optimized C2 framework designed for <b>DedSec</b> field operations. It bypasses CtOS security layers by consolidating elite network discovery and wireless audit vectors into a single Raspberry Pi tactical unit.
 </p>
 
----
-
-### [ // FIELD_STATUS ]
-```yaml
-OPERATOR: void0x11
-LOCATION: [REDACTED]
-SYSTEM_INTEGRITY: █▓▒░░░░░░░ 24% (DEGRADED)
-ACTIVE_NODES: 147
-SIGNAL_STRENGTH: ▂▄▆█ 98%
-```
 
 ---
 
