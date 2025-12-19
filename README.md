@@ -1,4 +1,17 @@
-# VoidPWN: Automated Penetration Testing Platform
+<p align="center">
+  <img src="assets/Gemini_Generated_Image_ubqnxrubqnxrubqn.png" width="600" alt="VoidPWN Logo">
+</p>
+
+<p align="center">
+  <b>Comprehensive Penetration Testing Platform for Raspberry Pi</b><br>
+  <i>Empowering security research with professional auditing tools and an intuitive dashboard.</i>
+</p>
+
+<p align="center">
+  <img src="assets/Pi-Isometric.png" width="800" alt="VoidPWN Hardware Controller">
+</p>
+
+---
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platform: Raspberry Pi](https://img.shields.io/badge/Platform-Raspberry%20Pi-red.svg)](https://www.raspberrypi.org/)
@@ -7,6 +20,17 @@
 **VoidPWN** is a comprehensive, automated network security assessment platform designed for the Raspberry Pi. It provides a centralized web-based dashboard (HUD) for managing complex penetration testing operations, including network reconnaissance, wireless auditing, and automated attack scenarios—all through an intuitive interface optimized for portable deployment.
 
 ---
+
+## 📸 Interface Tour
+
+<p align="center">
+  <img src="assets/Net-Discovery.jpeg" width="45%" alt="Network Recon">
+  <img src="assets/Wifi-Attacks.jpeg" width="45%" alt="Wireless Attacks">
+</p>
+<p align="center">
+  <img src="assets/Report&Logging.jpeg" width="45%" alt="Operational Logs">
+  <img src="assets/Choose-Interface.jpeg" width="45%" alt="Dashboard Menu">
+</p>
 
 ## 🎯 Key Features
 
